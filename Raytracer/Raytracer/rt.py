@@ -76,7 +76,7 @@ class Raytracer(object):
                 self.screen.set_at((x,y), self.currColor)
 
 
-    def rtCastRay(self, origin, direction):
+    def rtCastRay(self, origin, direction, sceneObj = None):
         # Verifica el contacto de los rayos con cada objeto
         
         depth = float('inf')
@@ -84,12 +84,12 @@ class Raytracer(object):
         hit = None
 
         for obj in self.scene:
-            intercept = obj.ray_intersect(origin, direction)
-
-            if intercept:
-                if intercept.distance < depth:
-                    hit = intercept
-                    depth = intercept.distance
+            if sceneObj != obj:
+                intercept = obj.ray_intersect(origin, direction)
+                if intercept:
+                    if intercept.distance < depth:
+                        hit = intercept
+                        depth = intercept.distance
         
         return hit
 
@@ -127,8 +127,15 @@ class Raytracer(object):
                             if light.type == "Ambient":
                                 ambientColor = [ambientColor[i] + light.getLightColor()[i] for i in range(3)]
                             else:
-                                diffuseColor = [diffuseColor[i] + light.getDiffuseColor(intercept)[i] for i in range(3)]
-                                specularColor = [specularColor[i] + light.getSpecularColor(intercept, self.camPosition)[i] for i in range(3)]
+                                shadowIntersect = None
+
+                                if light.type == "Directional":
+                                    lightDirection = [i * -1 for i in light.direction]
+                                    shadowIntersect = self.rtCastRay(intercept.point, lightDirection, intercept.obj)
+
+                                if shadowIntersect == None:
+                                    diffuseColor = [diffuseColor[i] + light.getDiffuseColor(intercept)[i] for i in range(3)]
+                                    specularColor = [specularColor[i] + light.getSpecularColor(intercept, self.camPosition)[i] for i in range(3)]
 
                                 
                         lightColor = [ambientColor[i] + diffuseColor[i] + specularColor[i] for i in range(3)]

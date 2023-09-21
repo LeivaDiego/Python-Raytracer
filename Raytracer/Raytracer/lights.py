@@ -81,4 +81,3 @@ class DirectionalLight(Light):
         specularColor = [i * specularIntensity for i in self.color]
 
         return specularColor
-
