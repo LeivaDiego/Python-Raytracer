@@ -1,8 +1,5 @@
 from math import pi, tan
-from turtle import color
-import numpy as np
-
-from lights import Light
+from myNumpy import vector_normalize, subtract_vector
 
 class Raytracer(object):
 
@@ -108,7 +105,7 @@ class Raytracer(object):
                     Px *= self.rightEdge
                     Py *= self.topEdge
                     direction = [Px, Py, -self.nearPlane]
-                    direction = direction / np.linalg.norm(direction)
+                    direction = vector_normalize(direction)
 
                     intercept =  self.rtCastRay(self.camPosition, direction)
                     
@@ -133,8 +130,8 @@ class Raytracer(object):
                                 if light.type == "Directional":
                                     lightDirection = [i * -1 for i in light.direction]
                                 elif light.type == "Point":
-                                    lightDirection = np.subtract(light.point, intercept.point)
-                                    lightDirection = lightDirection / np.linalg.norm(lightDirection)
+                                    lightDirection = subtract_vector(light.point, intercept.point)
+                                    lightDirection = vector_normalize(lightDirection)
 
                                 shadowIntersect = self.rtCastRay(intercept.point, lightDirection, intercept.obj)
 

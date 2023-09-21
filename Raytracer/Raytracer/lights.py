@@ -1,18 +1,4 @@
-import numpy as np
-
-def reflectVector(normal, direction):
-    # Calcula el reflejo de un vector
-
-    # obtiene el producto punto de la normal y la direccion
-    reflect = 2 * np.dot(normal, direction)
-    # multiplica el resultado por la normal
-    reflect = np.multiply(reflect, normal)
-    # resta la direccion al resultado
-    reflect = np.subtract(reflect, direction)
-    # normaliza el resultado
-    reflect = reflect / np.linalg.norm(reflect)
-
-    return reflect
+from myNumpy import vector_normalize, dot_product, subtract_vector, vector_normal, reflectVector
 
 
 class Light(object):
@@ -51,13 +37,13 @@ class DirectionalLight(Light):
 
     def __init__(self, direction = (0,-1,0), intensity=1, color=(1, 1, 1)):
         super().__init__(intensity, color, "Directional")
-        self.direction = direction / np.linalg.norm(direction)
+        self.direction = vector_normalize(direction)
 
 
     def getDiffuseColor(self, intercept):
         direction = [i * -1 for i in self.direction]
 
-        intensity = np.dot(intercept.normal, direction) * self.intensity
+        intensity = dot_product(intercept.normal, direction) * self.intensity
         intensity = max(0, min(1, intensity))
         intensity *= 1 - intercept.obj.material.Ks
 
@@ -71,10 +57,10 @@ class DirectionalLight(Light):
         
         reflect = reflectVector(intercept.normal, direction)
 
-        viewDir = np.subtract(viewPos, intercept.point)
-        viewDir = viewDir / np.linalg.norm(viewDir)
+        viewDir = subtract_vector(viewPos, intercept.point)
+        viewDir = vector_normalize(viewDir)
 
-        specularIntensity = max(0, np.dot(viewDir, reflect)) ** intercept.obj.material.specular
+        specularIntensity = max(0, dot_product(viewDir, reflect)) ** intercept.obj.material.specular
         specularIntensity *= intercept.obj.material.Ks
         specularIntensity *= self.intensity
 
@@ -91,18 +77,18 @@ class PointLight(Light):
 
 
     def getDiffuseColor(self, intercept):
-        direction = np.subtract(self.point, intercept.point)
-        R = np.linalg.norm(direction) 
-        direction = direction / R
+        direction = subtract_vector(self.point, intercept.point)
+        R = vector_normal(direction)
+        direction = [direction[i] / R for i in range(3)]
 
-        intensity = np.dot(intercept.normal, direction) * self.intensity
+        intensity = dot_product(intercept.normal, direction) * self.intensity
         intensity *= 1 - intercept.obj.material.Ks
 
         # Ley de cuadrados inversos
         # I final = Intensidad / R^2
         # R es la distancia del punto intercepto a la luz de punto
         if R != 0:
-            intensity /= R**2
+            intensity = intensity / R**2
         
         intensity = max(0, min(1, intensity))
         
@@ -111,16 +97,16 @@ class PointLight(Light):
         return diffuseColor
 
     def getSpecularColor(self, intercept, viewPos):
-        direction = np.subtract(self.point, intercept.point)
-        R = np.linalg.norm(direction) 
-        direction = direction / R
+        direction = subtract_vector(self.point, intercept.point)
+        R = vector_normal(direction)
+        direction = [direction[i] / R for i in range(3)]
         
         reflect = reflectVector(intercept.normal, direction)
 
-        viewDir = np.subtract(viewPos, intercept.point)
-        viewDir = viewDir / np.linalg.norm(viewDir)
+        viewDir = subtract_vector(viewPos, intercept.point)
+        viewDir = vector_normalize(viewDir)
 
-        specularIntensity = max(0, np.dot(viewDir, reflect)) ** intercept.obj.material.specular
+        specularIntensity = max(0, dot_product(viewDir, reflect)) ** intercept.obj.material.specular
         specularIntensity *= intercept.obj.material.Ks
         specularIntensity *= self.intensity
 

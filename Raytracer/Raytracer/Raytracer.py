@@ -1,6 +1,5 @@
 import pygame
 from pygame.locals import *
-
 from rt import Raytracer
 from figures import *
 from lights import *

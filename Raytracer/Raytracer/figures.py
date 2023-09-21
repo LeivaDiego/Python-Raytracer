@@ -1,5 +1,4 @@
-import numpy as np
-
+from myNumpy import vector_normal, dot_product, subtract_vector, vector_normalize
 
 class Intercept(object):
     def __init__(self, distance, point, normal, obj):
@@ -32,9 +31,9 @@ class Sphere(Shape):
     def ray_intersect(self, origin, direction):
         # Propia funcion de interseccion de rayos para la esfera
 
-        L = np.subtract(self.position, origin)
-        lengthL = np.linalg.norm(L)
-        tca = np.dot(L, direction)
+        L = subtract_vector(self.position, origin)
+        lengthL = vector_normal(L)
+        tca = dot_product(L, direction)
         d = (lengthL**2 - tca **2) ** 0.5
 
         if d > self.radius:
@@ -52,9 +51,9 @@ class Sphere(Shape):
             return None
         
         #  P = O + D *t0 
-        P = np.add(origin, t0 * np.array(direction))
-        point_normal = np.subtract(P, self.position)
-        point_normal = point_normal / np.linalg.norm(point_normal)
+        P = [origin[i] + (t0 * direction[i]) for i in range(3)]
+        point_normal = subtract_vector(P, self.position)
+        point_normal = vector_normalize(point_normal)
 
         return Intercept(distance = t0,
                          point = P,
