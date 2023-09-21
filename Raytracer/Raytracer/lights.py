@@ -1,5 +1,20 @@
 import numpy as np
 
+def reflectVector(normal, direction):
+    # Calcula el reflejo de un vector
+
+    # obtiene el producto punto de la normal y la direccion
+    reflect = 2 * np.dot(normal, direction)
+    # multiplica el resultado por la normal
+    reflect = np.multiply(reflect, normal)
+    # resta la direccion al resultado
+    reflect = np.subtract(reflect, direction)
+    # normaliza el resultado
+    reflect = reflect / np.linalg.norm(reflect)
+
+    return reflect
+
+
 class Light(object):
     # Clase que representa una luz
 
@@ -50,5 +65,18 @@ class DirectionalLight(Light):
         return diffuseColor
 
 
-    
+    def getSpecularColor(self, intercept, viewPos):
+        direction = [i * -1 for i in self.direction]
         
+        reflect = reflectVector(intercept.normal, direction)
+
+        viewDir = np.subtract(viewPos, intercept.point)
+        viewDir = viewDir / np.linalg.norm(viewDir)
+
+        specularIntensity = max(0, np.dot(viewDir, reflect)) ** intercept.obj.material.specular
+        specularIntensity *= self.intensity
+
+        specularColor = [i * specularIntensity for i in self.color]
+
+        return specularColor
+

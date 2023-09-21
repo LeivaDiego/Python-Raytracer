@@ -20,10 +20,14 @@ raytracer = Raytracer(screen)
 raytracer.rtClearColor(0.25, 0.25, 0.25)
 
 # Creacion de materiales
-brick = Material(diffuse=(1, 0.4, 0.4))
+brick = Material(diffuse=(1, 0.4, 0.4), spec = 8)
+grass = Material(diffuse=(0.4, 1, 0.4), spec = 32)
+water = Material(diffuse=(0.4, 0.4, 1), spec = 256)
 
 # Figuras en la escena
-raytracer.scene.append(Sphere(position = (0,0,-5), radius = 1, material = brick))
+raytracer.scene.append(Sphere(position = (-2,0,-5), radius = 0.5, material = brick))
+raytracer.scene.append(Sphere(position = (0,0,-5), radius = 0.5, material = grass))
+raytracer.scene.append(Sphere(position = (2,0,-5), radius = 0.5, material = water))
 
 # Luces de la escena
 raytracer.lights.append(AmbientLight(intensity=0.1))
