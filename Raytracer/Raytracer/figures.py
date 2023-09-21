@@ -40,7 +40,7 @@ class Sphere(Shape):
         if d > self.radius:
             return None
 
-        thc = (self.radius **2 - d **4) ** 0.5
+        thc = (self.radius ** 2 - d ** 2) ** 0.5
 
         t0 = tca - thc
         t1 = tca + thc

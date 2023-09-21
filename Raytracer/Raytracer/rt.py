@@ -78,6 +78,8 @@ class Raytracer(object):
 
     def rtCastRay(self, origin, direction):
         # Verifica el contacto de los rayos con cada objeto
+        
+        depth = float('inf')
         intercept = None
         hit = None
 
@@ -85,7 +87,9 @@ class Raytracer(object):
             intercept = obj.ray_intersect(origin, direction)
 
             if intercept:
-                hit = intercept
+                if intercept.distance < depth:
+                    hit = intercept
+                    depth = intercept.distance
         
         return hit
 
