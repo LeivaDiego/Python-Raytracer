@@ -41,6 +41,7 @@ class Sphere(Shape):
             return None
 
         thc = (self.radius **2 - d **4) ** 0.5
+
         t0 = tca - thc
         t1 = tca + thc
 
@@ -49,7 +50,8 @@ class Sphere(Shape):
 
         if t0 < 0:
             return None
-
+        
+        #  P = O + D *t0 
         P = np.add(origin, t0 * np.array(direction))
         point_normal = np.subtract(P, self.position)
         point_normal = point_normal / np.linalg.norm(point_normal)
