@@ -7,7 +7,7 @@ from lights import *
 from materials import *
 
 width = 512
-height = 512
+height = 1024
 
 pygame.init()
 
@@ -26,38 +26,30 @@ pebble  = Material(diffuse=(0.1, 0.1, 0.1), spec = 10, Ks = 0.08)
 iris    = Material(diffuse=(  1,   1,   1), spec = 250, Ks = 0.2)
 
 
-# -------------------------------------- Material Testing ---------------------------------------
-
-raytracer.scene.append(Sphere(position = (0,0, -7), radius = 1, material = iris))
-#raytracer.scene.append(Sphere(position = (0,0,-7), radius = 1, material = carrot))
-#raytracer.scene.append(Sphere(position = (0,0, -7), radius = 1, material = iris))
-#raytracer.scene.append(Sphere(position = (0,0, -7), radius = 1, material = pebble))
-
-
 # --------------------------------------- Escena Snow Man ---------------------------------------
-## Cuerpo
-#raytracer.scene.append(Sphere(position = (0,-2.55,-10), radius = 2, material = snow))
-#raytracer.scene.append(Sphere(position = (0, 0,-10), radius = 1.6, material = snow))
-#raytracer.scene.append(Sphere(position = (0, 2.3,-10), radius = 1.2, material = snow))
+# Cuerpo
+raytracer.scene.append(Sphere(position = (0,-2.55,-10), radius = 2, material = snow))
+raytracer.scene.append(Sphere(position = (0, 0,-10), radius = 1.6, material = snow))
+raytracer.scene.append(Sphere(position = (0, 2.3,-10), radius = 1.2, material = snow))
 
-## Rostro
-##   ojos
-#raytracer.scene.append(Sphere(position = (-0.5, 2.45,-8.8), radius = 0.2, material = iris))
-#raytracer.scene.append(Sphere(position = ( 0.5, 2.45,-8.8), radius = 0.2, material = iris))
-#raytracer.scene.append(Sphere(position = (-0.48, 2.42,-8.5), radius = 0.1, material = pebble))
-#raytracer.scene.append(Sphere(position = ( 0.48, 2.42,-8.5), radius = 0.1, material = pebble))
-##   nariz
-#raytracer.scene.append(Sphere(position = (0, 2.25, -8.8), radius = 0.25, material = carrot))
-##   sonrisa
-#raytracer.scene.append(Sphere(position = (-0.4, 1.8,-9), radius = 0.1, material = pebble))
-#raytracer.scene.append(Sphere(position = (-0.15, 1.7,-9), radius = 0.1, material = pebble))
-#raytracer.scene.append(Sphere(position = ( 0.15, 1.7,-9), radius = 0.1, material = pebble))
-#raytracer.scene.append(Sphere(position = ( 0.4, 1.8,-9), radius = 0.1, material = pebble))
+# Rostro
+#   ojos
+raytracer.scene.append(Sphere(position = (-0.5, 2.45,-8.8), radius = 0.2, material = iris))
+raytracer.scene.append(Sphere(position = ( 0.5, 2.45,-8.8), radius = 0.2, material = iris))
+raytracer.scene.append(Sphere(position = (-0.48, 2.42,-8.5), radius = 0.1, material = pebble))
+raytracer.scene.append(Sphere(position = ( 0.48, 2.42,-8.5), radius = 0.1, material = pebble))
+#   nariz
+raytracer.scene.append(Sphere(position = (0, 2.25, -8.8), radius = 0.25, material = carrot))
+#   sonrisa
+raytracer.scene.append(Sphere(position = (-0.4, 1.8,-9), radius = 0.1, material = pebble))
+raytracer.scene.append(Sphere(position = (-0.15, 1.7,-9), radius = 0.1, material = pebble))
+raytracer.scene.append(Sphere(position = ( 0.15, 1.7,-9), radius = 0.1, material = pebble))
+raytracer.scene.append(Sphere(position = ( 0.4, 1.8,-9), radius = 0.1, material = pebble))
 
-## Botones
-#raytracer.scene.append(Sphere(position = (0,-1.8,-8), radius = 0.30, material = pebble))
-#raytracer.scene.append(Sphere(position = (0, -0.5,-8), radius = 0.25, material = pebble))
-#raytracer.scene.append(Sphere(position = (0, 0.5,-8), radius = 0.20, material = pebble))
+# Botones
+raytracer.scene.append(Sphere(position = (0,-1.8,-8), radius = 0.30, material = pebble))
+raytracer.scene.append(Sphere(position = (0, -0.5,-8), radius = 0.25, material = pebble))
+raytracer.scene.append(Sphere(position = (0, 0.5,-8), radius = 0.20, material = pebble))
 
 
 # -------------------------------------- Luces de la escena -------------------------------------
