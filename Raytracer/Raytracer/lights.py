@@ -81,3 +81,54 @@ class DirectionalLight(Light):
         specularColor = [i * specularIntensity for i in self.color]
 
         return specularColor
+
+
+
+class PointLight(Light):
+    def __init__(self, point = (0,0,0), intensity = 1, color = (1, 1, 1)):
+        super().__init__(intensity, color, "Point")
+        self.point = point
+
+
+    def getDiffuseColor(self, intercept):
+        direction = np.subtract(self.point, intercept.point)
+        R = np.linalg.norm(direction) 
+        direction = direction / R
+
+        intensity = np.dot(intercept.normal, direction) * self.intensity
+        intensity *= 1 - intercept.obj.material.Ks
+
+        # Ley de cuadrados inversos
+        # I final = Intensidad / R^2
+        # R es la distancia del punto intercepto a la luz de punto
+        if R != 0:
+            intensity /= R**2
+        
+        intensity = max(0, min(1, intensity))
+        
+        diffuseColor = [i * intensity for i in self.color]
+
+        return diffuseColor
+
+    def getSpecularColor(self, intercept, viewPos):
+        direction = np.subtract(self.point, intercept.point)
+        R = np.linalg.norm(direction) 
+        direction = direction / R
+        
+        reflect = reflectVector(intercept.normal, direction)
+
+        viewDir = np.subtract(viewPos, intercept.point)
+        viewDir = viewDir / np.linalg.norm(viewDir)
+
+        specularIntensity = max(0, np.dot(viewDir, reflect)) ** intercept.obj.material.specular
+        specularIntensity *= intercept.obj.material.Ks
+        specularIntensity *= self.intensity
+
+        if R != 0:
+            specularIntensity /= R**2
+        
+        specularIntensity = max(0, min(1, specularIntensity))
+
+        specularColor = [i * specularIntensity for i in self.color]
+
+        return specularColor
