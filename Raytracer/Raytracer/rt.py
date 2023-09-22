@@ -1,5 +1,7 @@
 from math import pi, tan
 from myNumpy import vector_normalize, subtract_vector
+import pygame
+import random
 
 class Raytracer(object):
 
@@ -94,54 +96,61 @@ class Raytracer(object):
     def rtRender(self):
         # Renderiza en la pantalla
         # Generar los rayos para cada pixel de la pantalla
-        for x in range(self.vpX, self.vpX + self.vpWidth + 1):
-            for y in range(self.vpY, self.vpY + self.vpHeight + 1):
-                # Pasar de coordenadas de ventana a
-                # coordenadas NDC, coordenadas normalizadas (rango de -1 a 1)
-                if (0 <= x < self.width) and (0 <= y < self.height):
-                    Px = ((x + 0.5 - self.vpX) / self.vpWidth) * 2 - 1
-                    Py = ((y + 0.5 - self.vpY) / self.vpHeight) * 2 - 1
-                    
-                    Px *= self.rightEdge
-                    Py *= self.topEdge
-                    direction = [Px, Py, -self.nearPlane]
-                    direction = vector_normalize(direction)
 
-                    intercept =  self.rtCastRay(self.camPosition, direction)
+        indeces = [(i, j) for i in range(self.vpWidth) for j in range(self.vpHeight)]
+        random.shuffle(indeces)
+
+        for i, j in indeces:
+            x = i + self.vpX
+            y = j + self.vpY
+
+            # Pasar de coordenadas de ventana a
+            # coordenadas NDC, coordenadas normalizadas (rango de -1 a 1)
+            if (0 <= x < self.width) and (0 <= y < self.height):
+                Px = ((x + 0.5 - self.vpX) / self.vpWidth) * 2 - 1
+                Py = ((y + 0.5 - self.vpY) / self.vpHeight) * 2 - 1
                     
-                    if intercept:
-                        # Modelo de reflexion Phong
-                        # LightColor = AmbientIntensity + Diffuse + Specular
-                        # FinalColor = SurfaceColor * LightColor
+                Px *= self.rightEdge
+                Py *= self.topEdge
+                direction = [Px, Py, -self.nearPlane]
+                direction = vector_normalize(direction)
+
+                intercept =  self.rtCastRay(self.camPosition, direction)
+                    
+                if intercept:
+                    # Modelo de reflexion Phong
+                    # LightColor = AmbientIntensity + Diffuse + Specular
+                    # FinalColor = SurfaceColor * LightColor
                          
-                        surfaceColor = intercept.obj.material.diffuse
+                    surfaceColor = intercept.obj.material.diffuse
 
-                        ambientColor = [0,0,0]
-                        diffuseColor = [0,0,0]
-                        specularColor =[0,0,0]
+                    ambientColor = [0,0,0]
+                    diffuseColor = [0,0,0]
+                    specularColor =[0,0,0]
                         
-                        for light in self.lights:
-                            if light.type == "Ambient":
-                                ambientColor = [ambientColor[i] + light.getLightColor()[i] for i in range(3)]
-                            else:
+                    for light in self.lights:
+                        if light.type == "Ambient":
+                            ambientColor = [ambientColor[i] + light.getLightColor()[i] for i in range(3)]
+                        else:
                                
-                                lightDirection = None
+                            lightDirection = None
 
-                                if light.type == "Directional":
-                                    lightDirection = [i * -1 for i in light.direction]
-                                elif light.type == "Point":
-                                    lightDirection = subtract_vector(light.point, intercept.point)
-                                    lightDirection = vector_normalize(lightDirection)
+                            if light.type == "Directional":
+                                lightDirection = [i * -1 for i in light.direction]
+                            elif light.type == "Point":
+                                lightDirection = subtract_vector(light.point, intercept.point)
+                                lightDirection = vector_normalize(lightDirection)
 
-                                shadowIntersect = self.rtCastRay(intercept.point, lightDirection, intercept.obj)
+                            shadowIntersect = self.rtCastRay(intercept.point, lightDirection, intercept.obj)
 
-                                if shadowIntersect == None:
-                                    diffuseColor = [diffuseColor[i] + light.getDiffuseColor(intercept)[i] for i in range(3)]
-                                    specularColor = [specularColor[i] + light.getSpecularColor(intercept, self.camPosition)[i] for i in range(3)]
+                            if shadowIntersect == None:
+                                diffuseColor = [diffuseColor[i] + light.getDiffuseColor(intercept)[i] for i in range(3)]
+                                specularColor = [specularColor[i] + light.getSpecularColor(intercept, self.camPosition)[i] for i in range(3)]
 
                                 
-                        lightColor = [ambientColor[i] + diffuseColor[i] + specularColor[i] for i in range(3)]
+                    lightColor = [ambientColor[i] + diffuseColor[i] + specularColor[i] for i in range(3)]
 
-                        finalColor = [min(1, surfaceColor[i] * lightColor[i]) for i in range(3)]
+                    finalColor = [min(1, surfaceColor[i] * lightColor[i]) for i in range(3)]
                         
-                        self.rtPoint(x,y, finalColor)
+                    self.rtPoint(x,y, finalColor)
+                    pygame.display.flip()

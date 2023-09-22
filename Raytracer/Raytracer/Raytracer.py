@@ -33,19 +33,17 @@ raytracer.lights.append(AmbientLight(intensity=0.1))
 #raytracer.lights.append(DirectionalLight(direction = (-1,-1,-1), intensity = 0.7))
 raytracer.lights.append(PointLight(point = (2.5,0,-5), intensity = 1, color = (1,0,1)))
 
+
+raytracer.rtClear()
+raytracer.rtRender()
+
 isRunning = True
 while isRunning:
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             isRunning = False
         elif event.type == pygame.KEYDOWN:
             if event.type == pygame.K_ESCAPE:
                 isRunning = False
-
-    raytracer.rtClear()
-    raytracer.rtRender()
-
-    pygame.display.flip()
 
 pygame.quit()
