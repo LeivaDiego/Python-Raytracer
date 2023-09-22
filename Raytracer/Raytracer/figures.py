@@ -1,11 +1,13 @@
 from myNumpy import vector_normal, dot_product, subtract_vector, vector_normalize
+from math import pi, tan, atan2, acos
 
 class Intercept(object):
-    def __init__(self, distance, point, normal, obj):
+    def __init__(self, distance, point, normal, obj, texcoords):
         self.distance = distance
         self.point = point
         self.normal = normal
         self.obj = obj
+        self.texcoords = texcoords
 
 
 
@@ -55,7 +57,11 @@ class Sphere(Shape):
         point_normal = subtract_vector(P, self.position)
         point_normal = vector_normalize(point_normal)
 
+        u = atan2(point_normal[2], point_normal[0]) / (2 * pi) + 0.5
+        v = acos(point_normal[1]) / pi
+
         return Intercept(distance = t0,
                          point = P,
                          normal = point_normal,
-                         obj = self)
+                         obj = self,
+                         texcoords = (u,v))
