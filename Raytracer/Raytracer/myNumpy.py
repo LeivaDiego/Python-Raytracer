@@ -1,4 +1,4 @@
-from math import isclose, sqrt
+from math import acos, asin, isclose, sqrt
 
 def barycentricCoords(A, B, C, P):
     
@@ -152,6 +152,7 @@ def vector_normalize(vector):
     normalized_vector = [component / magnitude for component in vector]
     return normalized_vector
 
+
 def vector_normal(vector):
     # Obtiene la normal de un vector
     # vector: Vector a sacar su normal
@@ -161,6 +162,7 @@ def vector_normal(vector):
     magnitude = sqrt(sum(component ** 2 for component in vector))
 
     return magnitude
+
 
 def subtract_vector(vectorA, vectorB):
     # Resta dos vectores componente a componente
@@ -173,6 +175,19 @@ def subtract_vector(vectorA, vectorB):
         raise ValueError("Los vectores deben tener la misma longitud.")
     # Restar componente a componente los vectores
     return [a - b for a, b in zip(vectorA, vectorB)]
+
+
+def add_vector(vectorA, vectorB):
+    # Suma dos vectores componente a componente
+    # vectorA: Vector sumando
+    # vectorB: Vector sumando
+    # Retorna: Vector resultante de la suma
+
+    # Verificar si los vectores tienen la misma longitud
+    if len(vectorA) != len(vectorB):
+        raise ValueError("Los vectores deben tener la misma longitud.")
+    # Restar componente a componente los vectores
+    return [a + b for a, b in zip(vectorA, vectorB)]
 
 
 def dot_product(A, B):
@@ -188,6 +203,10 @@ def dot_product(A, B):
     return result
 
 
+def vector_scalar_mult(scalar, vector):
+    return [scalar * vector[i] for i in range(3)]
+
+
 def reflectVector(normal, direction):
     # Calcula el reflejo de un vector
 
@@ -201,3 +220,51 @@ def reflectVector(normal, direction):
     reflect = vector_normalize(reflect)
 
     return reflect
+
+
+def refractVector(incident, normal, n1, n2):
+    # Snell's Law
+    
+    c1 = dot_product(normal, incident)
+
+    if c1 < 0: 
+        c1 = -c1
+    else:
+        normal = [normal[i] * -1 for i in range(3)]
+        n1, n2 = n2, n1
+
+    n = n1 / n2 
+    
+    #T = n * (incident + c1 * normal) - normal * (1 - n**2 * (1 - c1 **2)) ** 5
+    term1 = vector_scalar_mult(n, add_vector(incident, vector_scalar_mult(c1, normal)))
+    term2 = vector_scalar_mult(((1 - n**2 * (1 - c1**2))**0.5), normal)
+    T = subtract_vector(term1, term2)
+    T = vector_normalize(T)
+    
+    return T
+
+
+def totalInternalReflection(incident, normal, n1, n2):
+    c1 = dot_product(normal, incident)
+
+    if c1 < 0: 
+        c1 = -c1
+    else:
+        normal = [normal[i] * -1 for i in range(3)]
+        n1, n2 = n2, n1
+
+    if n1 < n2:
+        return False
+
+    theta1 = acos(c1)
+    thetaC = asin(n2/n1)
+
+    return theta1 >= thetaC
+
+
+def fresnel(n1, n2):
+    kr = ((n1**0.5 - n2**0.5) ** 2) / ((n1**0.5 + n2**0.5) ** 2)
+
+    kt = 1 - kr
+
+    return kr, kt

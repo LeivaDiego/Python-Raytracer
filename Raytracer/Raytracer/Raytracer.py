@@ -32,15 +32,18 @@ water = Material(diffuse=(0.4, 0.4, 1), spec = 256, Ks = 0.2)
 earth = Material(texture = earthTexture)
 marble = Material(texture= marbleTexture)
 
+# Transparentes
+glass = Material(diffuse=(0.9, 0.9, 0.9), spec = 64, Ks = 0.2, ior= 1.5, matType = TRANSPARENT)
+
 # Reflectivos
 mirror = Material(diffuse=(0.9, 0.9, 0.9), spec = 64, Ks = 0.2, matType = REFLECTIVE)
 blueMirror = Material(diffuse=(0.4, 0.4, 0.9), spec = 32, Ks = 0.15, matType = REFLECTIVE)
 
 # Figuras en la escena
-raytracer.scene.append(Sphere(position = (-2,0,-7), radius = 1.5, material = marble))
-raytracer.scene.append(Sphere(position = (2,0,-7), radius = 2, material = earth))
-raytracer.scene.append(Sphere(position = (0,-1,-5), radius = 0.5, material = mirror))
-
+#raytracer.scene.append(Sphere(position = (-2,0,-7), radius = 1.5, material = marble))
+#raytracer.scene.append(Sphere(position = (2,0,-7), radius = 2, material = earth))
+#raytracer.scene.append(Sphere(position = (0,-1,-5), radius = 0.5, material = mirror))
+raytracer.scene.append(Sphere(position = (0,0,-5), radius = 2, material = glass))
 
 # Luces de la escena
 raytracer.lights.append(AmbientLight(intensity=0.1))
@@ -50,6 +53,8 @@ raytracer.lights.append(DirectionalLight(direction = (-1,-1,-1), intensity = 0.9
 
 raytracer.rtClear()
 raytracer.rtRender()
+
+print("\n Render Time: ", pygame.time.get_ticks() / 1000, "secs")
 
 isRunning = True
 while isRunning:
