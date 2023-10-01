@@ -5,7 +5,7 @@ from figures import *
 from lights import *
 from materials import *
 
-width = 100
+width = 160
 height = 100
 
 pygame.init()
@@ -26,7 +26,7 @@ woodTexture = pygame.image.load("textures/wood.jpg")
 holoTexture = pygame.image.load("textures/holographic.jpg")
 waterTexture = pygame.image.load("textures/water.jpg")
 
-# Creacion de materiales
+# --------------------------------------- Creacion de materiales ---------------------------------------
 # Opacos
 rock = Material(spec = 8, Ks = 0.01, texture = rockTexture)
 wood = Material(spec = 10, Ks = 0.08, texture = woodTexture)
@@ -39,9 +39,22 @@ polished = Material(diffuse=(0.6, 0.6, 0.6), spec = 64, Ks = 0.2, matType = REFL
 holographic = Material(spec = 64, Ks = 0.15, ior = 1.5, matType = TRANSPARENT, texture = holoTexture)
 crystal = Material(diffuse=(1, 1, 1), spec = 128, Ks = 0.2, ior = 1.5, matType = TRANSPARENT)
 
-raytracer.scene.append(Sphere(position = (0,0,-5), radius = 1, material = crystal))
 
-# Luces de la escena
+# --------------------------------------- Objetos en la escena -----------------------------------------
+# opacos
+raytracer.scene.append(Sphere(position = (-3, 1.5,-5), radius = 1, material = rock))
+raytracer.scene.append(Sphere(position = (-3,-1.5,-5), radius = 1, material = wood))
+
+# reflectivos
+raytracer.scene.append(Sphere(position = (0, 1.5,-5), radius = 1, material = water))
+raytracer.scene.append(Sphere(position = (0,-1.5,-5), radius = 1, material = polished))
+
+#transparentes
+raytracer.scene.append(Sphere(position = (3, 1.5,-5), radius = 1, material = holographic))
+raytracer.scene.append(Sphere(position = (3,-1.5,-5), radius = 1, material = crystal))
+
+
+# --------------------------------------- Luces de la escena -------------------------------------------
 raytracer.lights.append(AmbientLight(intensity=0.1))
 raytracer.lights.append(DirectionalLight(direction = (-1,-1,-1), intensity = 0.9))
 #raytracer.lights.append(PointLight(point = (2.5,0,-5), intensity = 1, color = (1,0,1)))
