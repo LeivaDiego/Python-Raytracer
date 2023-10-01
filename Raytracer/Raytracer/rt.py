@@ -1,8 +1,6 @@
 from math import pi, tan, atan2, acos
-from operator import ior
-from weakref import ref
 from materials import *
-from myNumpy import dot_product, fresnel, refractVector, totalInternalReflection, vector_normalize, add_vector,subtract_vector, reflectVector
+from myNumpy import dot_product, fresnel, refractVector, totalInternalReflection, vector_normalize, add_vector,subtract_vector, reflectVector, vector_scalar_mult
 import pygame
 import random
 
@@ -200,19 +198,47 @@ class Raytracer(object):
 
         # Para superficie refractiva (transparente)
         elif material.type == TRANSPARENT:
+            # Revisar si esta afuera
             outside = dot_product(rayDirection, intercept.normal) < 0
-            bias = [intercept.normal[i] * 0.001 for i in range(3)]
+            # Agregar un margen de error
+            bias = vector_scalar_mult(0.0001, intercept.normal)
 
-            #reflect = reflectVector(intercept.normal, [i * -1 for i in rayDirection])
-            #reflectOrigin = add_vector(intercept.point, bias) if outside else subtract_vector(intercept.point, bias)
-            #reflectIntercept = self.rtCastRay(reflectOrigin, reflect, None, recursion + 1)
-            #reflectColor = self.rtRayColor(reflectIntercept, reflect, recursion + 1)
+            # Generacion de rayos de refleccion
+            reflect = reflectVector(intercept.normal, vector_scalar_mult(-1, rayDirection))
+            reflectOrigin = add_vector(intercept.point, bias) if outside else subtract_vector(intercept.point, bias)
+            reflectIntercept = self.rtCastRay(reflectOrigin, reflect, None, recursion + 1)
+            reflectColor = self.rtRayColor(reflectIntercept, reflect, recursion + 1)
 
+            # Calcular la especularidad del material
+            for light in self.lights:
+                if light.type != "Ambient":
+
+                    lightDirection = None
+
+                    if light.type == "Directional":
+                        lightDirection = [i * -1 for i in light.direction]
+
+                    elif light.type == "Point":
+                        lightDirection = subtract_vector(light.point, intercept.point)
+                        lightDirection = vector_normalize(lightDirection)
+
+                    shadowIntersect = self.rtCastRay(intercept.point, lightDirection, intercept.obj)
+
+                    if shadowIntersect == None:
+                        specularColor = [specularColor[i] + light.getSpecularColor(intercept, self.camPosition)[i] for i in range(3)]
+
+
+            # Generacion de rayos de refraccion si no hay refleccion interna total
             if not totalInternalReflection(intercept.normal, rayDirection, 1.0, material.ior):
                 refract = refractVector(intercept.normal, rayDirection, 1.0, material.ior)
                 refractOrigin = subtract_vector(intercept.point, bias) if outside else add_vector(intercept.point, bias)
                 refractIntercept = self.rtCastRay(refractOrigin, refract, None, recursion + 1)
                 refractColor = self.rtRayColor(refractIntercept, refract, recursion + 1)
+
+                # Usando Fresnel se determina la intensidad de la refleccion y refraccion
+                Kr, Kt = fresnel(intercept.normal, rayDirection, 1.0, material.ior)
+                reflectColor = vector_scalar_mult(Kr, reflectColor)
+                refractColor = vector_scalar_mult(Kt, refractColor)
 
 
         # Obtencion del color final en la superficie

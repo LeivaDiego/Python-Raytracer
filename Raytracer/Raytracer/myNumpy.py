@@ -179,9 +179,9 @@ def subtract_vector(vectorA, vectorB):
 
 def add_vector(vectorA, vectorB):
     # Suma dos vectores componente a componente
-    # vectorA: Vector sumando
-    # vectorB: Vector sumando
-    # Retorna: Vector resultante de la suma
+    # vectorA: Vector sumando A 
+    # vectorB: Vector sumando B
+    # Retorna: Vector resultante de la suma entre A y B
 
     # Verificar si los vectores tienen la misma longitud
     if len(vectorA) != len(vectorB):
@@ -191,8 +191,12 @@ def add_vector(vectorA, vectorB):
 
 
 def dot_product(A, B):
-    # Clacula el producto punto entre 2 vectores
+    # Calcula el producto punto entre 2 vectores
+    # A: vector A
+    # B: vector B
+    # Retorna: Producto punto entre A y B
 
+    # Verifica que las dimension de los vectores sea la misma
     if len(A) != len(B):
         raise ValueError("los vectores deben tener la misma longitud")
 
@@ -204,11 +208,25 @@ def dot_product(A, B):
 
 
 def vector_scalar_mult(scalar, vector):
-    return [scalar * vector[i] for i in range(3)]
+    # Realiza una multiplicacion de un vector por un numero
+    # scalar: factor escalar
+    # vector: factor vector
+    # Retorna: un nuevo vector con cada elemento multiplicado por el numero
+
+    return [vector[i] * scalar for i in range(3)]
+
+
+def vector_scalar_div(scalar, vector):
+    # Realiza una division de un vector por un numero
+    # scalar: divisor escalar
+    # vector: dividendo vector
+    # Retorna: un nuevo vector con cada elemento dividido por el numero
+
+    return [vector[i] / scalar for i in range(3)]
 
 
 def reflectVector(normal, direction):
-    # Calcula el reflejo de un vector
+    # Calcula el reflejo de un vector de luz
 
     # obtiene el producto punto de la normal y la direccion
     reflect = 2 * dot_product(normal, direction)
@@ -222,49 +240,75 @@ def reflectVector(normal, direction):
     return reflect
 
 
-def refractVector(incident, normal, n1, n2):
+def refractVector(normal, incident, n1, n2):
+    # Calcula la refraccion de un vector de luz
+
     # Snell's Law
-    
+    # n1 indice de refraccion exterior (del aire)
+    # n2 indice de refraccion interior (del material)
+
     c1 = dot_product(normal, incident)
 
     if c1 < 0: 
         c1 = -c1
     else:
-        normal = [normal[i] * -1 for i in range(3)]
+        normal = vector_scalar_mult(-1, normal)
         n1, n2 = n2, n1
-
-    n = n1 / n2 
     
-    #T = n * (incident + c1 * normal) - normal * (1 - n**2 * (1 - c1 **2)) ** 5
-    term1 = vector_scalar_mult(n, add_vector(incident, vector_scalar_mult(c1, normal)))
-    term2 = vector_scalar_mult(((1 - n**2 * (1 - c1**2))**0.5), normal)
-    T = subtract_vector(term1, term2)
+    #T = (n1 / n2) * (incident + (c1 * normal)) - normal * (1 - ((n1 / n2)**2) * (1 - c1**2)) **0.5
+    term1 = add_vector(incident, vector_scalar_mult(c1, normal))
+    term2 = vector_scalar_mult((1 - ((n1/n2)**2 * (1 - c1**2)))**0.5, normal)
+    T = subtract_vector(vector_scalar_mult(n1/n2, term1), term2)
     T = vector_normalize(T)
-    
+
     return T
 
 
-def totalInternalReflection(incident, normal, n1, n2):
+def totalInternalReflection(normal, incident, n1, n2):
+    # Determina si hay reflexion interna total dadas las condiciones iniciales
+    # normal: Vector normal a la superficie
+    # incident: Vector de incidencia de la luz
+    # n1: indice de refracción del aire
+    # n2: indice de refracción de la superficie
+    # Retorna: True si ocurre reflexion interna total. False en caso contrario
+
     c1 = dot_product(normal, incident)
 
     if c1 < 0: 
         c1 = -c1
     else:
-        normal = [normal[i] * -1 for i in range(3)]
         n1, n2 = n2, n1
 
     if n1 < n2:
         return False
 
-    theta1 = acos(c1)
-    thetaC = asin(n2/n1)
-
-    return theta1 >= thetaC
+    return acos(c1) >= asin(n2/n1)
 
 
-def fresnel(n1, n2):
-    kr = ((n1**0.5 - n2**0.5) ** 2) / ((n1**0.5 + n2**0.5) ** 2)
+def fresnel(normal, incident, n1, n2):
+    # Calcula los coeficientes de reflexion y transmision usando las ecuaciones de Fresnel
+    # normal: Vector normal a la superficie
+    # incident: Vector de incidencia de la luz
+    # n1: indice de refraccion del aire
+    # n2: indice de refraccion de la superficie
+    # Retorna 
+    # Kr: Coeficiente de reflexion
+    # Kt: Coeficiente de transmisión
 
-    kt = 1 - kr
+    c1 = dot_product(normal, incident)
 
-    return kr, kt
+    if c1 < 0: 
+        c1 = -c1
+    else:
+        n1, n2 = n2, n1
+
+    s2 = (n1 * (1 - c1**2) **0.5) / n2
+    c2 = (1 - s2**2) **0.5
+
+    F1 = (((n2 * c1) - (n1 * c2)) / ((n2 * c1) + (n1 * c2)))**2
+    F2 = (((n1 * c2) - (n2 * c1)) / ((n1 * c2) + (n2 * c1)))**2
+
+    Kr = (F1 + F2) / 2
+    Kt = 1 - Kr
+
+    return Kr, Kt

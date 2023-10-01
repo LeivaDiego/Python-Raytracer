@@ -5,13 +5,13 @@ from figures import *
 from lights import *
 from materials import *
 
-width = 256
-height = 256
+width = 100
+height = 100
 
 pygame.init()
 
 # Creacion de la pantalla de pygame
-screen = pygame.display.set_mode((width, height), pygame.DOUBLEBUF | pygame.HWACCEL | pygame.HWSURFACE)
+screen = pygame.display.set_mode((width, height), pygame.DOUBLEBUF | pygame.HWACCEL | pygame.HWSURFACE | pygame.SCALED)
 screen.set_alpha(None)
 
 # Instanciar el raytracer
@@ -29,21 +29,23 @@ marbleTexture = pygame.image.load("maps/marble_map.jpg")
 brick = Material(diffuse=(1, 0.4, 0.4), spec = 8, Ks = 0.01)
 grass = Material(diffuse=(0.4, 1, 0.4), spec = 32, Ks = 0.1)
 water = Material(diffuse=(0.4, 0.4, 1), spec = 256, Ks = 0.2)
+
+# con texturas
 earth = Material(texture = earthTexture)
 marble = Material(texture= marbleTexture)
-
-# Transparentes
-glass = Material(diffuse=(0.9, 0.9, 0.9), spec = 64, Ks = 0.2, ior= 1.5, matType = TRANSPARENT)
-
 # Reflectivos
 mirror = Material(diffuse=(0.9, 0.9, 0.9), spec = 64, Ks = 0.2, matType = REFLECTIVE)
 blueMirror = Material(diffuse=(0.4, 0.4, 0.9), spec = 32, Ks = 0.15, matType = REFLECTIVE)
 
+# Transparentes
+glass = Material(diffuse=(0.9, 0.9, 0.9), spec = 64, Ks = 0.15, ior= 1.5, matType = TRANSPARENT)
+diamond = Material(diffuse=(0.9, 0.9, 0.9), spec = 128, Ks = 0.2, ior= 1.5, matType = TRANSPARENT)
+
+
 # Figuras en la escena
-#raytracer.scene.append(Sphere(position = (-2,0,-7), radius = 1.5, material = marble))
-#raytracer.scene.append(Sphere(position = (2,0,-7), radius = 2, material = earth))
-#raytracer.scene.append(Sphere(position = (0,-1,-5), radius = 0.5, material = mirror))
-raytracer.scene.append(Sphere(position = (0,0,-5), radius = 2, material = glass))
+raytracer.scene.append(Sphere(position = (-1,0,-5), radius = 1, material = glass))
+raytracer.scene.append(Sphere(position = (1,0,-5), radius = 0.7, material = diamond))
+raytracer.scene.append(Sphere(position = (0,0,-8), radius = 1, material = brick))
 
 # Luces de la escena
 raytracer.lights.append(AmbientLight(intensity=0.1))
