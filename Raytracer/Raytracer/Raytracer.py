@@ -17,7 +17,7 @@ screen.set_alpha(None)
 # Instanciar el raytracer
 raytracer = Raytracer(screen)
 
-raytracer.environmentMap = pygame.image.load("maps/parking_lot_map.jpg")
+raytracer.environmentMap = pygame.image.load("maps/containers_map.jpg")
 
 raytracer.rtClearColor(0.25, 0.25, 0.25)
 
@@ -39,6 +39,8 @@ polished = Material(diffuse=(0.6, 0.6, 0.6), spec = 64, Ks = 0.2, matType = REFL
 holographic = Material(spec = 64, Ks = 0.15, ior = 1.5, matType = TRANSPARENT, texture = holoTexture)
 crystal = Material(diffuse=(1, 1, 1), spec = 128, Ks = 0.2, ior = 1.5, matType = TRANSPARENT)
 
+# Extra
+grass = Material(diffuse=(0.4, 1, 0.4), spec = 32, Ks = 0.1)
 
 # --------------------------------------- Objetos en la escena -----------------------------------------
 # opacos
@@ -52,6 +54,9 @@ raytracer.scene.append(Sphere(position = (0,-1.5,-5), radius = 1, material = pol
 #transparentes
 raytracer.scene.append(Sphere(position = (3, 1.5,-5), radius = 1, material = holographic))
 raytracer.scene.append(Sphere(position = (3,-1.5,-5), radius = 1, material = crystal))
+
+# Extra
+raytracer.scene.append(Sphere(position = (2.8,-1.4,-10), radius = 0.5, material = grass))
 
 
 # --------------------------------------- Luces de la escena -------------------------------------------
