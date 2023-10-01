@@ -17,12 +17,12 @@ screen.set_alpha(None)
 # Instanciar el raytracer
 raytracer = Raytracer(screen)
 
-raytracer.environmentMap = pygame.image.load("maps/parking_space.jpg")
+raytracer.environmentMap = pygame.image.load("maps/parking_lot_map.jpg")
 
 raytracer.rtClearColor(0.25, 0.25, 0.25)
 
-earthTexture = pygame.image.load("maps/2k_earth_daymap.jpg")
-marbleTexture = pygame.image.load("maps/marble_map.jpg")
+earthTexture = pygame.image.load("textures/earth_tex.jpg")
+marbleTexture = pygame.image.load("textures/marble_tex.jpg")
 
 # Creacion de materiales
 # Opacos
