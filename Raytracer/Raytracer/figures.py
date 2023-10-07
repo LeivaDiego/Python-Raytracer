@@ -191,9 +191,9 @@ class AABB(Shape):
 								# Generacion de las uv's
 								if abs(plane.normal[0] > 0):
 									# La cara esta en X, se usa Y y Z para crear las uv's
-									u = (planePoint[1] - self.boundsMin[1]) / (self.size[1] + self.bias * 2)
-									v = (planePoint[2] - self.boundsMin[2]) / (self.size[2] + self.bias * 2)
-									
+									u = (planePoint[2] - self.boundsMin[2]) / (self.size[2] + self.bias * 2)
+									v = 1 - (planePoint[1] - self.boundsMin[1]) / (self.size[1] + self.bias * 2)
+								
 								elif abs(plane.normal[1] > 0):
 									# La cara esta en Y, se usa X y Z para crear las uv's
 									u = (planePoint[0] - self.boundsMin[0]) / (self.size[0] + self.bias * 2) 
@@ -202,7 +202,7 @@ class AABB(Shape):
 								elif abs(plane.normal[2] > 0):
 									# La cara esta en Z, se usa X y Y para crear las uv's
 									u = (planePoint[0] - self.boundsMin[0]) / (self.size[0] + self.bias * 2)
-									v = (planePoint[1] - self.boundsMin[1]) / (self.size[1] + self.bias * 2)
+									v = 1 - (planePoint[1] - self.boundsMin[1]) / (self.size[1] + self.bias * 2)
 
 		if intersect is None:
 			return None
