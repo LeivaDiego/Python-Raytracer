@@ -43,9 +43,10 @@ diamond = Material(diffuse=(0.9, 0.9, 0.9), spec = 128, Ks = 0.2, ior= 1.5, matT
 
 
 # Figuras en la escena
-raytracer.scene.append(Sphere(position = (-1,0,-5), radius = 1, material = glass))
-raytracer.scene.append(Sphere(position = (1,0,-5), radius = 0.7, material = diamond))
-raytracer.scene.append(Sphere(position = (0,0,-8), radius = 1, material = brick))
+#raytracer.scene.append(Sphere(position = (-1,0,-5), radius = 1, material = glass))
+#raytracer.scene.append(Sphere(position = (1,0,-5), radius = 0.7, material = diamond))
+raytracer.scene.append(Sphere(position = (0,0,-5), radius = 1, material = diamond))
+raytracer.scene.append(Plane(position = (0,-5,0), normal=(0,1,0), material = brick))
 
 # Luces de la escena
 raytracer.lights.append(AmbientLight(intensity=0.1))
