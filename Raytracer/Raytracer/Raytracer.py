@@ -78,4 +78,9 @@ while isRunning:
             if event.type == pygame.K_ESCAPE:
                 isRunning = False
 
+
+rect = pygame.Rect(0, 0, width, height)
+sub = screen.subsurface(rect)
+pygame.image.save(sub, "output.jpg")
+
 pygame.quit()
