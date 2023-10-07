@@ -1,3 +1,4 @@
+from code import interact
 from myNumpy import add_vector, vector_normal, dot_product, subtract_vector, vector_normalize, vector_scalar_mult
 from math import pi, atan2, acos
 
@@ -76,6 +77,7 @@ class Plane(Shape):
 		self.normal = normal
 		super().__init__(position, material)
 
+
 	def ray_intersect(self, origin, direction):
 		# Distancia  = ((posiscion plano - origen rayo) o normal) / (direccion rayo o normal)
 
@@ -97,6 +99,33 @@ class Plane(Shape):
 
 		return Intercept(distance = t,
 						 point = P,
+						 normal = self.normal,
+						 obj = self,
+						 texcoords = None)
+
+
+class Disk(Plane):
+	# Clase que representa un disco
+
+	def __init__(self, position, normal, radius, material):
+		self.radius = radius
+		super().__init__(position, normal, material)
+
+
+	def ray_intersect(self, origin, direction):
+		planeIntersect = super().ray_intersect(origin, direction)
+		
+		if planeIntersect is None:
+			return None
+
+		contactDistance = subtract_vector(planeIntersect.point, self.position)
+		contactDistance = vector_normal(contactDistance)
+
+		if contactDistance > self.radius:
+			return None
+
+		return Intercept(distance = planeIntersect.distance,
+						 point = planeIntersect.point,
 						 normal = self.normal,
 						 obj = self,
 						 texcoords = None)
