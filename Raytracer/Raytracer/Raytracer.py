@@ -5,8 +5,8 @@ from figures import *
 from lights import *
 from materials import *
 
-width = 512
-height = 512
+width = 100
+height = 100
 
 pygame.init()
 
@@ -23,6 +23,7 @@ raytracer.rtClearColor(0.25, 0.25, 0.25)
 
 earthTexture = pygame.image.load("textures/earth_tex.jpg")
 marbleTexture = pygame.image.load("textures/marble_tex.jpg")
+boxTexture = pygame.image.load("textures/wood_box.jpg")
 
 # Creacion de materiales
 # Opacos
@@ -33,6 +34,8 @@ water = Material(diffuse=(0.4, 0.4, 1), spec = 256, Ks = 0.2)
 # con texturas
 earth = Material(texture = earthTexture)
 marble = Material(texture= marbleTexture)
+box = Material(spec = 8, Ks = 0.05, matType = OPAQUE, texture = boxTexture)
+
 # Reflectivos
 mirror = Material(diffuse=(0.9, 0.9, 0.9), spec = 64, Ks = 0.2, matType = REFLECTIVE)
 blueMirror = Material(diffuse=(0.4, 0.4, 0.9), spec = 32, Ks = 0.15, matType = REFLECTIVE)
@@ -45,9 +48,15 @@ diamond = Material(diffuse=(0.9, 0.9, 0.9), spec = 128, Ks = 0.2, ior= 1.5, matT
 # Figuras en la escena
 #raytracer.scene.append(Sphere(position = (-1,0,-5), radius = 1, material = glass))
 #raytracer.scene.append(Sphere(position = (1,0,-5), radius = 0.7, material = diamond))
-raytracer.scene.append(Sphere(position = (0,0.5,-5), radius = 1, material = diamond))
-raytracer.scene.append(Plane(position = (0,-5,0), normal=(0,1,0), material = brick))
-raytracer.scene.append(Disk(position=(0,-1,-5), normal=(0,1,0), radius = 1.5, material= mirror))
+#raytracer.scene.append(Sphere(position = (0,0.5,-5), radius = 1, material = diamond))
+#raytracer.scene.append(Plane(position = (0,-5,0), normal=(0,1,0), material = brick))
+#raytracer.scene.append(Disk(position=(0,-1,-5), normal=(0,1,0), radius = 1.5, material= mirror))
+
+raytracer.scene.append(AABB(position = (-1,  1, -5), size = (1,1,1), material = box))
+raytracer.scene.append(AABB(position = (-1, -1, -5), size = (1,1,1), material = brick))
+raytracer.scene.append(AABB(position = ( 1,  1, -5), size = (1,1,1), material = mirror))
+raytracer.scene.append(AABB(position = ( 1, -1, -5), size = (1,1,1), material = glass))
+
 
 # Luces de la escena
 raytracer.lights.append(AmbientLight(intensity=0.1))
