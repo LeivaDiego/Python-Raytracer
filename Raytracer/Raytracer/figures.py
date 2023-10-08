@@ -109,7 +109,7 @@ class Plane(Shape):
 		P = add_vector(origin, D)
 
 		# Repeticion cada 10n unidades de la textura
-		repeat = 0.1
+		repeat = 0.09
 
 		# Obtener uv's de textura
 		u = dot_product(subtract_vector(P, self.position), self.u_vector) * repeat % 1

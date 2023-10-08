@@ -5,8 +5,8 @@ from figures import *
 from lights import *
 from materials import *
 
-width = 192
-height = 108
+width = 100
+height = 100
 
 pygame.init()
 
@@ -28,27 +28,36 @@ neonTexture = pygame.image.load("textures/neon_tex.jpg")
 alienTexture = pygame.image.load("textures/alien_tex.jpg")
 
 
-# Creacion de materiales
+# --------------------------------------- Creacion de materiales ---------------------------------------
 # con texturas
-wall = Material(spec = 5, Ks = 0.1, matType = OPAQUE, texture = wallTexture)
-floor = Material(spec = 5, Ks = 0.2, matType = OPAQUE, texture = floorTexture)
-roof = Material(spec = 5, Ks = 0.25, matType = OPAQUE, texture = roofTexture)
-alien = Material(spec = 32, Ks = 0.8, matType = OPAQUE, texture = alienTexture)
-neon = Material(spec = 64, Ks = 0.9, matType = OPAQUE, texture = neonTexture)
+wall = Material(spec = 5, Ks = 0.1, texture = wallTexture)
+floor = Material(spec = 5, Ks = 0.2, texture = floorTexture)
+roof = Material(spec = 5, Ks = 0.25, texture = roofTexture)
+alien = Material(spec = 32, Ks = 0.8, texture = alienTexture)
+neon = Material(spec = 64, Ks = 0.9, texture = neonTexture)
+
 
 # Reflectivos
 violetMirror = Material(diffuse=(0.561, 0.227, 0.949), spec = 64, Ks = 0.2, matType = REFLECTIVE)
 
-# Transparentes
-window = Material(diffuse=(0.227, 0.902, 0.949), spec = 64, Ks = 0.15, ior = 1.5, matType = TRANSPARENT)
 
 
-# Figuras en la escena
+# ------------------------------------------ Planos en escena ------------------------------------------
+raytracer.scene.append(Plane(position = (0,-5,0), normal=(0,1,0), material = floor))    # Inferior
+raytracer.scene.append(Plane(position = (0,5,0), normal=(0,-1,0), material = roof))     # Superior
+raytracer.scene.append(Plane(position = (-5,0,0), normal=(1,0,0), material = wall))     # Izquierda
+raytracer.scene.append(Plane(position = (5,0,0), normal=(-1,0,0), material = wall))     # Derecha
+raytracer.scene.append(Plane(position = (0,0,-25), normal=(0,0,1), material = wall))    # Trasera
 
 
-# Luces de la escena
-raytracer.lights.append(AmbientLight(intensity=0.1))
-raytracer.lights.append(DirectionalLight(direction = (-1,-1,-1), intensity = 0.9))
+
+# ---------------------------------------- Objetos en la escena ----------------------------------------
+
+
+
+# ----------------------------------------- Luces de la escena -----------------------------------------
+raytracer.lights.append(AmbientLight(intensity=0.4))
+#raytracer.lights.append(DirectionalLight(direction = (0.1,0.1,-1), intensity = 0.9))
 #raytracer.lights.append(PointLight(point = (2.5,0,-5), intensity = 1, color = (1,0,1)))
 
 
