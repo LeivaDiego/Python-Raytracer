@@ -5,8 +5,8 @@ from figures import *
 from lights import *
 from materials import *
 
-width = 100
-height = 100
+width = 1400
+height = 1400
 
 pygame.init()
 
