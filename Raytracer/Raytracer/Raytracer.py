@@ -26,6 +26,7 @@ roofTexture = pygame.image.load("textures/roof_tex.jpg")
 wallTexture = pygame.image.load("textures/wall_tex.jpg")
 neonTexture = pygame.image.load("textures/neon_tex.jpg")
 alienTexture = pygame.image.load("textures/alien_tex.jpg")
+corridorTexture = pygame.image.load("textures/corridor_tex.jpg")
 
 
 # --------------------------------------- Creacion de materiales ---------------------------------------
@@ -35,30 +36,31 @@ floor = Material(spec = 5, Ks = 0.2, texture = floorTexture)
 roof = Material(spec = 5, Ks = 0.25, texture = roofTexture)
 alien = Material(spec = 32, Ks = 0.8, texture = alienTexture)
 neon = Material(spec = 64, Ks = 0.9, texture = neonTexture)
+corridor = Material(spec = 64, Ks = 0.9, texture = corridorTexture)
 
 
 # Reflectivos
-violetMirror = Material(diffuse=(0.561, 0.227, 0.949), spec = 64, Ks = 0.2, matType = REFLECTIVE)
-
+mirror = Material(diffuse=(0.6, 0.7, 1), spec = 64, Ks = 0.2, matType = REFLECTIVE)
 
 
 # ------------------------------------------ Planos en escena ------------------------------------------
-raytracer.scene.append(Plane(position = (0,-5,0), normal=(0,1,0), material = floor))    # Inferior
-raytracer.scene.append(Plane(position = (0,5,0), normal=(0,-1,0), material = roof))     # Superior
-raytracer.scene.append(Plane(position = (-5,0,0), normal=(1,0,0), material = wall))     # Izquierda
-raytracer.scene.append(Plane(position = (5,0,0), normal=(-1,0,0), material = wall))     # Derecha
-raytracer.scene.append(Plane(position = (0,0,-25), normal=(0,0,1), material = wall))    # Trasera
-
+raytracer.scene.append(Plane(position = (0,-5,0), normal=(0,1,0), material =  floor))       # Inferior
+raytracer.scene.append(Plane(position = (0,5,0), normal=(0,-1,0), material =  roof))        # Superior
+raytracer.scene.append(Plane(position = (-5,0,0), normal=(1,0,0), material =  wall))        # Izquierda
+raytracer.scene.append(Plane(position = (5,0,0), normal=(-1,0,0), material =  wall))        # Derecha
+raytracer.scene.append(Plane(position = (0,0,-25), normal=(0,0,1), material = wall))        # Trasera
+raytracer.scene.append(Plane(position = (0,0,50), normal=(0,0,-1), material = corridor))    # Frontal
 
 
 # ---------------------------------------- Objetos en la escena ----------------------------------------
+raytracer.scene.append(AABB(position = (-1,  -1, -6), size = (1.5,1.5,1.5), material = neon))
+raytracer.scene.append(AABB(position = (1, -1, -5), size = (1.5,1.5,1.5), material = alien))
 
+raytracer.scene.append(Disk(position=(0,0,-15), normal=(0,0,1), radius = 2.5, material= mirror))
 
 
 # ----------------------------------------- Luces de la escena -----------------------------------------
-raytracer.lights.append(AmbientLight(intensity=0.4))
-#raytracer.lights.append(DirectionalLight(direction = (0.1,0.1,-1), intensity = 0.9))
-#raytracer.lights.append(PointLight(point = (2.5,0,-5), intensity = 1, color = (1,0,1)))
+raytracer.lights.append(AmbientLight(intensity = 0.7))
 
 
 raytracer.rtClear()
