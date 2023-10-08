@@ -5,8 +5,8 @@ from figures import *
 from lights import *
 from materials import *
 
-width = 100
-height = 100
+width = 192
+height = 108
 
 pygame.init()
 
@@ -49,13 +49,13 @@ diamond = Material(diffuse=(0.9, 0.9, 0.9), spec = 128, Ks = 0.2, ior= 1.5, matT
 #raytracer.scene.append(Sphere(position = (-1,0,-5), radius = 1, material = glass))
 #raytracer.scene.append(Sphere(position = (1,0,-5), radius = 0.7, material = diamond))
 #raytracer.scene.append(Sphere(position = (0,0.5,-5), radius = 1, material = diamond))
-#raytracer.scene.append(Plane(position = (0,-5,0), normal=(0,1,0), material = brick))
+raytracer.scene.append(Plane(position = (0,-5,0), normal=(0,1,0), material = earth))
 #raytracer.scene.append(Disk(position=(0,-1,-5), normal=(0,1,0), radius = 1.5, material= mirror))
 
-raytracer.scene.append(AABB(position = (-1,  1, -5), size = (1,1,1), material = box))
-raytracer.scene.append(AABB(position = (-1, -1, -5), size = (1,1,1), material = brick))
-raytracer.scene.append(AABB(position = ( 1,  1, -5), size = (1,1,1), material = mirror))
-raytracer.scene.append(AABB(position = ( 1, -1, -5), size = (1,1,1), material = glass))
+#raytracer.scene.append(AABB(position = (-1,  1, -5), size = (1,1,1), material = box))
+#raytracer.scene.append(AABB(position = (-1, -1, -5), size = (1,1,1), material = brick))
+#raytracer.scene.append(AABB(position = ( 1,  1, -5), size = (1,1,1), material = mirror))
+#raytracer.scene.append(AABB(position = ( 1, -1, -5), size = (1,1,1), material = glass))
 
 
 # Luces de la escena
