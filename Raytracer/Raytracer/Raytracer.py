@@ -25,11 +25,14 @@ earthTexture = pygame.image.load("textures/earth_tex.jpg")
 marbleTexture = pygame.image.load("textures/marble_tex.jpg")
 boxTexture = pygame.image.load("textures/wood_box.jpg")
 
-# Creacion de materiales
+# --------------------------------------- Creacion de materiales ---------------------------------------
 # Opacos
 brick = Material(diffuse=(1, 0.4, 0.4), spec = 8, Ks = 0.01)
 grass = Material(diffuse=(0.4, 1, 0.4), spec = 32, Ks = 0.1)
 water = Material(diffuse=(0.4, 0.4, 1), spec = 256, Ks = 0.2)
+# Reflectivos
+
+# Transparentes
 
 # con texturas
 earth = Material(texture = earthTexture)
@@ -44,14 +47,37 @@ blueMirror = Material(diffuse=(0.4, 0.4, 0.9), spec = 32, Ks = 0.15, matType = R
 glass = Material(diffuse=(0.9, 0.9, 0.9), spec = 64, Ks = 0.15, ior= 1.5, matType = TRANSPARENT)
 diamond = Material(diffuse=(0.9, 0.9, 0.9), spec = 128, Ks = 0.2, ior= 1.5, matType = TRANSPARENT)
 
-# Figuras en la escena
-raytracer.scene.append(Triangle(v0 = [-1,0,-5], v1 = [1,-1,-6], v2 = [0,1,-5], material = box))
-raytracer.scene.append(Sphere(position = [1,0,-8], radius = 1.5, material = mirror))
+# ---------------------------------------- Figuras en la escena ----------------------------------------
+# Triangulos
 
-# Luces de la escena
+# Triangulo Transparente
+raytracer.scene.append(Triangle(
+    v0=[-1, -1, -2],
+    v1=[ 1, -1, -2],
+    v2=[ 0,  1, -2],
+    material=brick
+))
+
+# Triangulo Reflectivo
+raytracer.scene.append(Triangle(
+    v0=[-4, -3, -5],
+    v1=[ 1,  1, -7],
+    v2=[-3,  3, -8],
+    material = brick 
+))
+
+# Triangulo Opaco
+raytracer.scene.append(Triangle(
+    v0=[0, -2, -4],
+    v1=[3,  -1, -5],
+    v2=[2,  2, -5],
+    material = brick 
+))
+
+# ----------------------------------------- Luces de la escena -----------------------------------------
 raytracer.lights.append(AmbientLight(intensity=0.1))
 raytracer.lights.append(DirectionalLight(direction = (-1,-1,-1), intensity = 0.9))
-raytracer.lights.append(PointLight(point = (2.5,0,-5), intensity = 1, color = (1,0,1)))
+raytracer.lights.append(PointLight(point = (2.5,0,-5), intensity = 1, color = (0,1,1)))
 
 
 raytracer.rtClear()
