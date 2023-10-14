@@ -1,4 +1,4 @@
-from myNumpy import vector_normalize, dot_product, subtract_vector, vector_normal, reflectVector
+from myNumpy import vector_normalize, dot_product, subtract_vector, vector_magnitude, reflectVector
 
 
 class Light(object):
@@ -78,7 +78,7 @@ class PointLight(Light):
 
     def getDiffuseColor(self, intercept):
         direction = subtract_vector(self.point, intercept.point)
-        R = vector_normal(direction)
+        R = vector_magnitude(direction)
         direction = [direction[i] / R for i in range(3)]
 
         intensity = dot_product(intercept.normal, direction) * self.intensity
@@ -98,7 +98,7 @@ class PointLight(Light):
 
     def getSpecularColor(self, intercept, viewPos):
         direction = subtract_vector(self.point, intercept.point)
-        R = vector_normal(direction)
+        R = vector_magnitude(direction)
         direction = [direction[i] / R for i in range(3)]
         
         reflect = reflectVector(intercept.normal, direction)

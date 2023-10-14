@@ -47,6 +47,7 @@ diamond = Material(diffuse=(0.9, 0.9, 0.9), spec = 128, Ks = 0.2, ior= 1.5, matT
 
 # Figuras en la escena
 raytracer.scene.append(Triangle(v0 = [-1,0,-5], v1 = [1,-1,-6], v2 = [0,1,-5], material = brick))
+raytracer.scene.append(Sphere(position = [1,0,-8], radius = 1.5, material = mirror))
 
 # Luces de la escena
 raytracer.lights.append(AmbientLight(intensity=0.1))

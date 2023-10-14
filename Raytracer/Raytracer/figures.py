@@ -1,4 +1,4 @@
-from myNumpy import add_vector, vector_normal, dot_product, subtract_vector, vector_normalize, vector_scalar_mult, cross_product
+from myNumpy import add_vector, vector_magnitude, dot_product, subtract_vector, vector_normalize, vector_scalar_mult, cross_product
 from math import pi, atan2, acos
 
 class Intercept(object):
@@ -35,7 +35,7 @@ class Sphere(Shape):
 		# Propia funcion de interseccion de rayos para la esfera
 
 		L = subtract_vector(self.position, origin)
-		lengthL = vector_normal(L)
+		lengthL = vector_magnitude(L)
 		tca = dot_product(L, direction)
 		d = (lengthL**2 - tca **2) ** 0.5
 
@@ -118,7 +118,7 @@ class Disk(Plane):
 			return None
 
 		contactDistance = subtract_vector(planeIntersect.point, self.position)
-		contactDistance = vector_normal(contactDistance)
+		contactDistance = vector_magnitude(contactDistance)
 
 		if contactDistance > self.radius:
 			return None
@@ -218,6 +218,8 @@ class Triangle(Shape):
 	# Clase que representa un triangulo 
 	# Referencias de: 
 	#				https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/why-are-triangles-useful.html
+	#				https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates.html
+
 
 	def __init__(self, v0, v1, v2, material):
 		# Vertices del triangulo
@@ -226,61 +228,69 @@ class Triangle(Shape):
 		self.v2 = v2
 
 		# Lineas del triangulo
-		edge1 = subtract_vector(self.v1, self.v0)
-		edge2 = subtract_vector(self.v2, self.v0)
+		v0v1 = subtract_vector(self.v1, self.v0)
+		v0v2 = subtract_vector(self.v2, self.v0)
 
-		# La normal
-		self.normal = vector_normalize(cross_product(edge1, edge2))
+		# La normal (no es necesario normalizar)
+		self.normal = vector_normalize(cross_product(v0v1, v0v2))
+		self.denom = dot_product(self.normal, self.normal)
 
-		# El centroide del triangulo
-		centroid = [(v0[i] + v1[i] + v2[i]) / 3 for i in range(3)]
-
-		super().__init__(centroid, material)
+		super().__init__(v0, material)
 
 	def ray_intersect(self, origin, direction):
-		NdotRayDirection = dot_product(direction, self.normal)
+		
+		# --- Paso 1: Obtener P ---
+		NdotRayDirection = dot_product(self.normal, direction)
 
-		# Rayo paralelo al triangulo
-		if abs(NdotRayDirection) < 0.0001:
+		# El rayo es paralelo al triangulo
+		if abs(NdotRayDirection) < 0.001:
 			return None
 		
 		# Parametro d
-		d = - dot_product(self.normal, self.v0)
+		d = dot_product(vector_scalar_mult(-1,self.normal), self.v0)
 
 		# Parametro t
 		t = - (dot_product(self.normal, origin) + d) / NdotRayDirection
-		
+
 		# El triangulo esta detras de camara
 		if t < 0:
 			return None
 		
-		# Punto de interseccion
+		# Punto de interseccion P
 		P = add_vector(origin, vector_scalar_mult(t, direction))
 
-		# Test Inside-Ouside
-		edge0 = subtract_vector(self.v1, self.v0)
-		edge1 = subtract_vector(self.v2, self.v1)
-		edge2 = subtract_vector(self.v0, self.v2)
-
-		vp0 = subtract_vector(P, self.v0)
-		vp1 = subtract_vector(P, self.v1)
-		vp2 = subtract_vector(P, self.v2)
+		# --- Paso 2: Test Inside-Ouside ---
 		
-		# Vector perpendicular al triangulo
-		c0 = cross_product(edge0,vp0)
-		c1 = cross_product(edge1,vp1)
-		c2 = cross_product(edge2,vp2)
+		C = []
 
-		test0 = dot_product(self.normal, c0)
-		test1 = dot_product(self.normal, c1)
-		test2 = dot_product(self.normal, c2)
-
-		# validar que P toque el triangulo
-		if test0 < 0 or test1 < 0 or test2 < 0:
+		# caso edge0
+		edge0 = subtract_vector(self.v1, self.v0)
+		vp0 = subtract_vector(P, self.v0)
+		C = cross_product(edge0, vp0)
+		if dot_product(self.normal, C) < 0:
 			return None
+
+		# caso edge1
+		edge1 = subtract_vector(self.v2, self.v1)
+		vp1 = subtract_vector(P, self.v1)
+		C = cross_product(edge1, vp1)
+		u = dot_product(self.normal, C)
+		if u < 0:
+			return None
+
+		# caso edge2
+		edge2 = subtract_vector(self.v0, self.v2)
+		vp2 = subtract_vector(P, self.v2)
+		C = cross_product(edge2,vp2)
+		v = dot_product(self.normal, C)
+		if v < 0:
+			return None
+
+		u = u / self.denom
+		v = v / self.denom
 
 		return Intercept(distance=t,
 							point=P,
 							normal=self.normal,
 							obj=self,
-							texcoords=None)
+							texcoords=(u,v))
