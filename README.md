@@ -13,3 +13,10 @@ tomo casi una hora de renderizado
 ## Entrega RT3: Planes, Disks and Cubes
 La entrega se encuentra en la branch "RT3"
 adjunte un png llamado output.png con el renderizado final
+
+## Entrega Lab 3: Ray-Intersect Algorithm, New Shapes
+La entrega se encuentra en la branch "Lab3"
+adjunto una preview del render final
+
+### Preview
+![output](https://github.com/LeivaDiego/Python-Raytracer/assets/110699607/33770019-5415-4e38-a696-1c0b27011169)
