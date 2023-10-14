@@ -215,10 +215,13 @@ class AABB(Shape):
 
 
 class Triangle(Shape):
-	# Clase que representa un triangulo 
-	# Referencias de: 
-	#				https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/why-are-triangles-useful.html
-	#				https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates.html
+	# Clase que representa un triangulo en un espacio 3D
+
+	# Referencias: 
+	#		- https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/why-are-triangles-useful.html
+	# 		- https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/ray-triangle-intersection-geometric-solution.html
+	#		- https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates.html
+	#		- https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection.html
 
 
 	def __init__(self, v0, v1, v2, material):
@@ -227,67 +230,56 @@ class Triangle(Shape):
 		self.v1 = v1
 		self.v2 = v2
 
-		# Lineas del triangulo
-		v0v1 = subtract_vector(self.v1, self.v0)
-		v0v2 = subtract_vector(self.v2, self.v0)
+		# vectores de las aristas del triangulo a partir de los vertices
+		self.v0v1 = subtract_vector(self.v1, self.v0)
+		self.v0v2 = subtract_vector(self.v2, self.v0)
 
-		# La normal (no es necesario normalizar)
-		self.normal = vector_normalize(cross_product(v0v1, v0v2))
-		self.denom = dot_product(self.normal, self.normal)
+		# La normal del triangulo a partir del producto cruz normalizado de las aristas
+		self.normal = vector_normalize(cross_product(self.v0v1, self.v0v2))
 
 		super().__init__(v0, material)
 
-	def ray_intersect(self, origin, direction):
-		
-		# --- Paso 1: Obtener P ---
-		NdotRayDirection = dot_product(self.normal, direction)
 
-		# El rayo es paralelo al triangulo
-		if abs(NdotRayDirection) < 0.001:
+	def ray_intersect(self, origin, direction):
+		# Algoritmo Möller - Trumbore
+		pvec = cross_product(direction, self.v0v2)
+		det = dot_product(self.v0v1, pvec)
+		kEpsilon = 0.001	# valor de tolerancia
+
+		# Si el determinante es cercano a 0, el rayo es paralelo al triangulo
+		if abs(det) < kEpsilon:
 			return None
 		
-		# Parametro d
-		d = dot_product(vector_scalar_mult(-1,self.normal), self.v0)
+		# Obtencion de UV's
+		
+		invDet = 1.0 / det # el inverso del determinante
 
-		# Parametro t
-		t = - (dot_product(self.normal, origin) + d) / NdotRayDirection
+		tvec = subtract_vector(origin, self.v0) # vector t dado desde el origen de rayo hasta el v0
+		
+		u = dot_product(tvec, pvec) * invDet
 
-		# El triangulo esta detras de camara
+		# si la coordenada U esta fuera del rango [0,1] no interseca con el triangulo
+		if u < 0 or u > 1:
+			return None
+	
+		qvec = cross_product(tvec, self.v0v1) # vector q dado por el producto cruz del vector t 
+											  # y la primera arista
+		
+		v = dot_product(direction, qvec) * invDet
+
+		# si la coordenada V esta fuera del rango [0,1] no interseca con el triangulo
+		if v < 0 or u + v > 1:
+			return None
+
+		# Parametro t: distancia desde el origen hasta el punto de interseccion
+		t = dot_product(self.v0v2,qvec) * invDet
+
+		# Si t es negativo, la interseccino esta detras del origen del rayo
 		if t < 0:
 			return None
-		
+
 		# Punto de interseccion P
 		P = add_vector(origin, vector_scalar_mult(t, direction))
-
-		# --- Paso 2: Test Inside-Ouside ---
-		
-		C = []
-
-		# caso edge0
-		edge0 = subtract_vector(self.v1, self.v0)
-		vp0 = subtract_vector(P, self.v0)
-		C = cross_product(edge0, vp0)
-		if dot_product(self.normal, C) < 0:
-			return None
-
-		# caso edge1
-		edge1 = subtract_vector(self.v2, self.v1)
-		vp1 = subtract_vector(P, self.v1)
-		C = cross_product(edge1, vp1)
-		u = dot_product(self.normal, C)
-		if u < 0:
-			return None
-
-		# caso edge2
-		edge2 = subtract_vector(self.v0, self.v2)
-		vp2 = subtract_vector(P, self.v2)
-		C = cross_product(edge2,vp2)
-		v = dot_product(self.normal, C)
-		if v < 0:
-			return None
-
-		u = u / self.denom
-		v = v / self.denom
 
 		return Intercept(distance=t,
 							point=P,
