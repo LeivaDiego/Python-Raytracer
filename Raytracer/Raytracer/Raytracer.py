@@ -1,4 +1,3 @@
-from token import OP
 import pygame
 from pygame.locals import *
 from rt import Raytracer
@@ -6,8 +5,8 @@ from figures import *
 from lights import *
 from materials import *
 
-width = 1024
-height = 400
+width = 200
+height = 100
 
 pygame.init()
 
