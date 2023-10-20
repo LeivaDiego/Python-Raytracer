@@ -312,8 +312,8 @@ class Triangle(Shape):
 class Model:
 	# Clase que representa un modelo 3D
 
-	def __init__(self, obj_filepath, material, translate=(0, 0, 0), rotate=(0, 0, 0), scale=(1, 1, 1)):
-		self.obj_filepath = obj_filepath
+	def __init__(self, file, material, translate=(0, 0, 0), rotate=(0, 0, 0), scale=(1, 1, 1)):
+		self.filename = file
 		self.material = material
 		self.translate = translate
 		self.rotate = rotate
@@ -324,7 +324,7 @@ class Model:
 	def load_model(self):
 		# Carga la informacion del modelo del archivo .obj para su procesamiento
 
-		obj = Obj(self.obj_filepath)
+		obj = Obj(self.filename)
 		
 		# Descomposicion del modelo en triangulos
 		for face in obj.faces:
@@ -338,13 +338,10 @@ class Model:
 			vt3 = obj.texcoords[face[2][1] - 1] if face[2][1] else None
 			
 			# Creacion de una instancia de Triangle
-			triangle = Triangle(v1, v2, v3, texcoords=(vt1, vt2, vt3))
+			triangle = Triangle(v1, v2, v3, self.material)
 			
 			# Aplicar las transformaciones correspondientes
 			self.apply_transformations(triangle)
-			
-			# Asignacion de material al triangulo
-			triangle.material = self.material
 			
 			# Agregar el triangulo al listado de triangulos del modelo
 			self.triangles.append(triangle)
@@ -361,9 +358,9 @@ class Model:
 		transformation_matrix = T @ (Rz @ (Ry @ (Rx @ S)))
 		
 		# Aplica la combinacion de las transformaciones para cada vertice del triangulo
+		triangle.v0 = (transformation_matrix @ np.append(triangle.v0, 1))[:3]
 		triangle.v1 = (transformation_matrix @ np.append(triangle.v1, 1))[:3]
 		triangle.v2 = (transformation_matrix @ np.append(triangle.v2, 1))[:3]
-		triangle.v3 = (transformation_matrix @ np.append(triangle.v3, 1))[:3]
 
 
 class Transform:
