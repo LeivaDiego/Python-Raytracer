@@ -1,5 +1,6 @@
 from myNumpy import add_vector, vector_magnitude, dot_product, subtract_vector, vector_normalize, vector_scalar_mult, cross_product
 from math import pi, atan2, acos
+from obj import Obj
 
 class Intercept(object):
 	def __init__(self, distance, point, normal, obj, texcoords):
@@ -304,3 +305,50 @@ class Triangle(Shape):
 							normal=self.normal,
 							obj=self,
 							texcoords=(u,v))
+
+
+
+class Model:
+	# Clase que representa un modelo 3D
+
+    def __init__(self, obj_filepath, material, translate=(0, 0, 0), rotate=(0, 0, 0), scale=(1, 1, 1)):
+        self.obj_filepath = obj_filepath
+        self.material = material
+        self.translate = translate
+        self.rotate = rotate
+        self.scale = scale
+        self.triangles = []
+        self.load_model()
+        
+    def load_model(self):
+        # Carga la informacion del modelo del archivo .obj para su procesamiento
+
+        obj = Obj(self.obj_filepath)
+        
+        # Descomposicion del modelo en triangulos
+        for face in obj.faces:
+            v1 = obj.vertices[face[0][0] - 1]
+            v2 = obj.vertices[face[1][0] - 1]
+            v3 = obj.vertices[face[2][0] - 1]
+            
+            # Obtencion de coordenadas UV para cada vertice
+            vt1 = obj.texcoords[face[0][1] - 1] if face[0][1] else None
+            vt2 = obj.texcoords[face[1][1] - 1] if face[1][1] else None
+            vt3 = obj.texcoords[face[2][1] - 1] if face[2][1] else None
+            
+            # Creacion de una instancia de Triangle
+            triangle = Triangle(v1, v2, v3, texcoords=(vt1, vt2, vt3))
+            
+            # Aplicar las transformaciones correspondientes
+            self.apply_transformations(triangle)
+            
+            # Asignacion de material al triangulo
+            triangle.material = self.material
+            
+            # Agregar el triangulo al listado de triangulos del modelo
+            self.triangles.append(triangle)
+            
+
+    def apply_transformations(self, triangle):
+		# Aplica las transformaciones de traslacion, rotacion y escala a un triangulo
+        pass
