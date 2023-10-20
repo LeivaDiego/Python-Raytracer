@@ -1,5 +1,4 @@
-from code import interact
-from myNumpy import add_vector, vector_normal, dot_product, subtract_vector, vector_normalize, vector_scalar_mult
+from myNumpy import add_vector, vector_magnitude, dot_product, subtract_vector, vector_normalize, vector_scalar_mult, cross_product
 from math import pi, atan2, acos
 
 class Intercept(object):
@@ -36,7 +35,7 @@ class Sphere(Shape):
 		# Propia funcion de interseccion de rayos para la esfera
 
 		L = subtract_vector(self.position, origin)
-		lengthL = vector_normal(L)
+		lengthL = vector_magnitude(L)
 		tca = dot_product(L, direction)
 		d = (lengthL**2 - tca **2) ** 0.5
 
@@ -119,7 +118,7 @@ class Disk(Plane):
 			return None
 
 		contactDistance = subtract_vector(planeIntersect.point, self.position)
-		contactDistance = vector_normal(contactDistance)
+		contactDistance = vector_magnitude(contactDistance)
 
 		if contactDistance > self.radius:
 			return None
@@ -212,3 +211,78 @@ class AABB(Shape):
 						 normal = intersect.normal,
 						 obj = self,
 						 texcoords = (u, v))
+
+
+
+class Triangle(Shape):
+	# Clase que representa un triangulo en un espacio 3D
+
+	# Referencias: 
+	#		- https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/why-are-triangles-useful.html
+	# 		- https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/ray-triangle-intersection-geometric-solution.html
+	#		- https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates.html
+	#		- https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection.html
+
+
+	def __init__(self, v0, v1, v2, material):
+		# Vertices del triangulo
+		self.v0 = v0
+		self.v1 = v1
+		self.v2 = v2
+
+		# vectores de las aristas del triangulo a partir de los vertices
+		self.v0v1 = subtract_vector(self.v1, self.v0)
+		self.v0v2 = subtract_vector(self.v2, self.v0)
+
+		# La normal del triangulo a partir del producto cruz normalizado de las aristas
+		self.normal = vector_normalize(cross_product(self.v0v1, self.v0v2))
+
+		super().__init__(v0, material)
+
+
+	def ray_intersect(self, origin, direction):
+		# Algoritmo Möller - Trumbore
+		pvec = cross_product(direction, self.v0v2)
+		det = dot_product(self.v0v1, pvec)
+		kEpsilon = 0.001	# valor de tolerancia
+
+		# Si el determinante es cercano a 0, el rayo es paralelo al triangulo
+		if abs(det) < kEpsilon:
+			return None
+		
+		# Obtencion de UV's
+		
+		invDet = 1.0 / det # el inverso del determinante
+
+		tvec = subtract_vector(origin, self.v0) # vector t dado desde el origen de rayo hasta el v0
+		
+		u = dot_product(tvec, pvec) * invDet
+
+		# si la coordenada U esta fuera del rango [0,1] no interseca con el triangulo
+		if u < 0 or u > 1:
+			return None
+	
+		qvec = cross_product(tvec, self.v0v1) # vector q dado por el producto cruz del vector t 
+											  # y la primera arista
+		
+		v = dot_product(direction, qvec) * invDet
+
+		# si la coordenada V esta fuera del rango [0,1] no interseca con el triangulo
+		if v < 0 or u + v > 1:
+			return None
+
+		# Parametro t: distancia desde el origen hasta el punto de interseccion
+		t = dot_product(self.v0v2,qvec) * invDet
+
+		# Si t es negativo, la interseccino esta detras del origen del rayo
+		if t < 0:
+			return None
+
+		# Punto de interseccion P
+		P = add_vector(origin, vector_scalar_mult(t, direction))
+
+		return Intercept(distance=t,
+							point=P,
+							normal=self.normal,
+							obj=self,
+							texcoords=(u,v))

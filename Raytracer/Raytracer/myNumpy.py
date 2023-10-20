@@ -153,7 +153,7 @@ def vector_normalize(vector):
     return normalized_vector
 
 
-def vector_normal(vector):
+def vector_magnitude(vector):
     # Obtiene la normal de un vector
     # vector: Vector a sacar su normal
     # Retorna: la normal del vector

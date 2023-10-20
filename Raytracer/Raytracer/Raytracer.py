@@ -1,3 +1,4 @@
+from token import OP
 import pygame
 from pygame.locals import *
 from rt import Raytracer
@@ -5,8 +6,8 @@ from figures import *
 from lights import *
 from materials import *
 
-width = 100
-height = 100
+width = 1024
+height = 400
 
 pygame.init()
 
@@ -17,51 +18,62 @@ screen.set_alpha(None)
 # Instanciar el raytracer
 raytracer = Raytracer(screen)
 
-raytracer.environmentMap = pygame.image.load("maps/parking_lot_map.jpg")
+raytracer.environmentMap = pygame.image.load("maps/future_map.jpg")
 
 raytracer.rtClearColor(0.25, 0.25, 0.25)
 
-earthTexture = pygame.image.load("textures/earth_tex.jpg")
-marbleTexture = pygame.image.load("textures/marble_tex.jpg")
-boxTexture = pygame.image.load("textures/wood_box.jpg")
+# ---------------------------------------- Creacion de Texturas ----------------------------------------
 
-# Creacion de materiales
+iridTexture   = pygame.image.load("textures/iridescent_tex.jpg")
+scalyTexture  = pygame.image.load("textures/scale_tex.jpg")
+spralTexture  = pygame.image.load("textures/spratlite_tex.png")
+metalTexture  = pygame.image.load("textures/metalex.jpg")
+
+# --------------------------------------- Creacion de materiales ---------------------------------------
 # Opacos
-brick = Material(diffuse=(1, 0.4, 0.4), spec = 8, Ks = 0.01)
-grass = Material(diffuse=(0.4, 1, 0.4), spec = 32, Ks = 0.1)
-water = Material(diffuse=(0.4, 0.4, 1), spec = 256, Ks = 0.2)
-
-# con texturas
-earth = Material(texture = earthTexture)
-marble = Material(texture= marbleTexture)
-box = Material(spec = 8, Ks = 0.05, matType = OPAQUE, texture = boxTexture)
+scaly = Material(spec = 64, Ks = 0.2, texture = scalyTexture)
+metalex = Material(spec = 32, Ks = 0.1, texture = metalTexture)
 
 # Reflectivos
-mirror = Material(diffuse=(0.9, 0.9, 0.9), spec = 64, Ks = 0.2, matType = REFLECTIVE)
-blueMirror = Material(diffuse=(0.4, 0.4, 0.9), spec = 32, Ks = 0.15, matType = REFLECTIVE)
+spratlite = Material(spec = 64, Ks = 0.2, matType = REFLECTIVE, texture = spralTexture)
 
 # Transparentes
-glass = Material(diffuse=(0.9, 0.9, 0.9), spec = 64, Ks = 0.15, ior= 1.5, matType = TRANSPARENT)
-diamond = Material(diffuse=(0.9, 0.9, 0.9), spec = 128, Ks = 0.2, ior= 1.5, matType = TRANSPARENT)
+iridescent = Material(diffuse=(0.9, 0.9, 0.9), spec = 128, Ks = 0.2, ior= 1.5, matType = TRANSPARENT, texture = iridTexture)
 
+# ---------------------------------------- Figuras en la escena ----------------------------------------
+# Triangulos
 
-# Figuras en la escena
-#raytracer.scene.append(Sphere(position = (-1,0,-5), radius = 1, material = glass))
-#raytracer.scene.append(Sphere(position = (1,0,-5), radius = 0.7, material = diamond))
-#raytracer.scene.append(Sphere(position = (0,0.5,-5), radius = 1, material = diamond))
-#raytracer.scene.append(Plane(position = (0,-5,0), normal=(0,1,0), material = brick))
-#raytracer.scene.append(Disk(position=(0,-1,-5), normal=(0,1,0), radius = 1.5, material= mirror))
+# Triangulo Opaco
+raytracer.scene.append(Triangle(
+    v0=[-1.2, -1, -2],
+    v1=[ 1.2, -1, -2],
+    v2=[ 0,  1, -2],
+    material = metalex
+))
 
-raytracer.scene.append(AABB(position = (-1,  1, -5), size = (1,1,1), material = box))
-raytracer.scene.append(AABB(position = (-1, -1, -5), size = (1,1,1), material = brick))
-raytracer.scene.append(AABB(position = ( 1,  1, -5), size = (1,1,1), material = mirror))
-raytracer.scene.append(AABB(position = ( 1, -1, -5), size = (1,1,1), material = glass))
+# Triangulo Reflectivo
+raytracer.scene.append(Triangle(
+    v0=[-5, 2, -4],
+    v1=[ 1,  1, -11],
+    v2=[-4,  -2.3, -6],
+    material = spratlite 
+))
 
+# Triangulo Transparente
+raytracer.scene.append(Triangle(
+    v0=[0, -2, -6],
+    v1=[6,  -1, -5],
+    v2=[3,  2, -5],
+    material = iridescent
+))
 
-# Luces de la escena
+# Extras
+raytracer.scene.append(Sphere(position = [0,0,-4], radius = 1, material = scaly))
+
+# ----------------------------------------- Luces de la escena -----------------------------------------
 raytracer.lights.append(AmbientLight(intensity=0.1))
 raytracer.lights.append(DirectionalLight(direction = (-1,-1,-1), intensity = 0.9))
-#raytracer.lights.append(PointLight(point = (2.5,0,-5), intensity = 1, color = (1,0,1)))
+raytracer.lights.append(PointLight(point = (2.5,0,-4.5), intensity = 100, color = (1,0.2,1)))
 
 
 raytracer.rtClear()
