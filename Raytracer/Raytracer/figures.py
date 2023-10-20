@@ -1,6 +1,7 @@
 from myNumpy import add_vector, vector_magnitude, dot_product, subtract_vector, vector_normalize, vector_scalar_mult, cross_product
 from math import pi, atan2, acos
 from obj import Obj
+import numpy as np
 
 class Intercept(object):
 	def __init__(self, distance, point, normal, obj, texcoords):
@@ -311,44 +312,115 @@ class Triangle(Shape):
 class Model:
 	# Clase que representa un modelo 3D
 
-    def __init__(self, obj_filepath, material, translate=(0, 0, 0), rotate=(0, 0, 0), scale=(1, 1, 1)):
-        self.obj_filepath = obj_filepath
-        self.material = material
-        self.translate = translate
-        self.rotate = rotate
-        self.scale = scale
-        self.triangles = []
-        self.load_model()
-        
-    def load_model(self):
-        # Carga la informacion del modelo del archivo .obj para su procesamiento
+	def __init__(self, obj_filepath, material, translate=(0, 0, 0), rotate=(0, 0, 0), scale=(1, 1, 1)):
+		self.obj_filepath = obj_filepath
+		self.material = material
+		self.translate = translate
+		self.rotate = rotate
+		self.scale = scale
+		self.triangles = []
+		self.load_model()
+		
+	def load_model(self):
+		# Carga la informacion del modelo del archivo .obj para su procesamiento
 
-        obj = Obj(self.obj_filepath)
-        
-        # Descomposicion del modelo en triangulos
-        for face in obj.faces:
-            v1 = obj.vertices[face[0][0] - 1]
-            v2 = obj.vertices[face[1][0] - 1]
-            v3 = obj.vertices[face[2][0] - 1]
-            
-            # Obtencion de coordenadas UV para cada vertice
-            vt1 = obj.texcoords[face[0][1] - 1] if face[0][1] else None
-            vt2 = obj.texcoords[face[1][1] - 1] if face[1][1] else None
-            vt3 = obj.texcoords[face[2][1] - 1] if face[2][1] else None
-            
-            # Creacion de una instancia de Triangle
-            triangle = Triangle(v1, v2, v3, texcoords=(vt1, vt2, vt3))
-            
-            # Aplicar las transformaciones correspondientes
-            self.apply_transformations(triangle)
-            
-            # Asignacion de material al triangulo
-            triangle.material = self.material
-            
-            # Agregar el triangulo al listado de triangulos del modelo
-            self.triangles.append(triangle)
-            
+		obj = Obj(self.obj_filepath)
+		
+		# Descomposicion del modelo en triangulos
+		for face in obj.faces:
+			v1 = obj.vertices[face[0][0] - 1]
+			v2 = obj.vertices[face[1][0] - 1]
+			v3 = obj.vertices[face[2][0] - 1]
+			
+			# Obtencion de coordenadas UV para cada vertice
+			vt1 = obj.texcoords[face[0][1] - 1] if face[0][1] else None
+			vt2 = obj.texcoords[face[1][1] - 1] if face[1][1] else None
+			vt3 = obj.texcoords[face[2][1] - 1] if face[2][1] else None
+			
+			# Creacion de una instancia de Triangle
+			triangle = Triangle(v1, v2, v3, texcoords=(vt1, vt2, vt3))
+			
+			# Aplicar las transformaciones correspondientes
+			self.apply_transformations(triangle)
+			
+			# Asignacion de material al triangulo
+			triangle.material = self.material
+			
+			# Agregar el triangulo al listado de triangulos del modelo
+			self.triangles.append(triangle)
+			
 
-    def apply_transformations(self, triangle):
-		# Aplica las transformaciones de traslacion, rotacion y escala a un triangulo
-        pass
+	def apply_transformations(self, triangle):
+		T = Transform.translation(*self.translate)
+		Rx = Transform.rotation_x(self.rotate[0])
+		Ry = Transform.rotation_y(self.rotate[1])
+		Rz = Transform.rotation_z(self.rotate[2])
+		S = Transform.scale(*self.scale)
+		
+		# Combinacion de matrices de transformacion
+		transformation_matrix = T @ (Rz @ (Ry @ (Rx @ S)))
+		
+		# Aplica la combinacion de las transformaciones para cada vertice del triangulo
+		triangle.v1 = (transformation_matrix @ np.append(triangle.v1, 1))[:3]
+		triangle.v2 = (transformation_matrix @ np.append(triangle.v2, 1))[:3]
+		triangle.v3 = (transformation_matrix @ np.append(triangle.v3, 1))[:3]
+
+
+class Transform:
+	# Clase que representa las matrices de transformaciones basicas de un objeto
+
+	@staticmethod
+	def translation(tx, ty, tz):
+		# Matrix de traslacion
+		return np.array([
+			[1, 0, 0, tx],
+			[0, 1, 0, ty],
+			[0, 0, 1, tz],
+			[0, 0, 0, 1]
+		])
+
+	@staticmethod
+	def scale(sx, sy, sz):
+		# Matriz de escala
+		return np.array([
+			[sx, 0, 0, 0],
+			[0, sy, 0, 0],
+			[0, 0, sz, 0],
+			[0, 0, 0, 1]
+		])
+
+	@staticmethod
+	def rotation_x(angle):
+		# Matriz de rotacion en eje X
+		c = np.cos(np.radians(angle))
+		s = np.sin(np.radians(angle))
+		return np.array([
+			[1, 0, 0, 0],
+			[0, c, -s, 0],
+			[0, s, c, 0],
+			[0, 0, 0, 1]
+		])
+
+	@staticmethod
+	def rotation_y(angle):
+		# Matriz de rotacion en eje Y
+		c = np.cos(np.radians(angle))
+		s = np.sin(np.radians(angle))
+		return np.array([
+			[c, 0, s, 0],
+			[0, 1, 0, 0],
+			[-s, 0, c, 0],
+			[0, 0, 0, 1]
+		])
+
+	@staticmethod
+	def rotation_z(angle):
+		# Matriz de rotacion en eje Z
+		c = np.cos(np.radians(angle))
+		s = np.sin(np.radians(angle))
+		return np.array([
+			[c, -s, 0, 0],
+			[s, c, 0, 0],
+			[0, 0, 1, 0],
+			[0, 0, 0, 1]
+		])
