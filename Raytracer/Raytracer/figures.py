@@ -1,5 +1,5 @@
 from code import interact
-from myNumpy import add_vector, vector_normal, dot_product, subtract_vector, vector_normalize, vector_scalar_mult
+from myNumpy import add_vector, cross_product, vector_normal, dot_product, subtract_vector, vector_normalize, vector_scalar_mult
 from math import pi, atan2, acos
 
 class Intercept(object):
@@ -75,6 +75,17 @@ class Plane(Shape):
 
 	def __init__(self, position, normal, material):
 		self.normal = normal
+
+		# Generar los vectores UV 
+		# Revisar si la normal no esta alineada al eje Z
+		if abs(self.normal[2]) < 0.999:
+			self.u_vector = vector_normalize(cross_product(self.normal, (0,0,1)))
+		else:
+			self.u_vector = vector_normalize(cross_product(self.normal, (0,1,0)))
+		
+		self.v_vector = vector_normalize(cross_product(self.normal, self.u_vector))
+		self.v_vector = vector_scalar_mult(-1, self.v_vector)
+
 		super().__init__(position, material)
 
 
@@ -97,11 +108,18 @@ class Plane(Shape):
 		D = vector_scalar_mult(t,direction)
 		P = add_vector(origin, D)
 
+		# Repeticion cada 10n unidades de la textura
+		repeat = 0.09
+
+		# Obtener uv's de textura
+		u = dot_product(subtract_vector(P, self.position), self.u_vector) * repeat % 1
+		v = dot_product(subtract_vector(P, self.position), self.v_vector) * repeat % 1
+
 		return Intercept(distance = t,
 						 point = P,
 						 normal = self.normal,
 						 obj = self,
-						 texcoords = None)
+						 texcoords = (u,v))
 
 
 class Disk(Plane):
@@ -118,8 +136,8 @@ class Disk(Plane):
 		if planeIntersect is None:
 			return None
 
-		contactDistance = subtract_vector(planeIntersect.point, self.position)
-		contactDistance = vector_normal(contactDistance)
+		contactVector = subtract_vector(planeIntersect.point, self.position)
+		contactDistance = vector_normal(contactVector)
 
 		if contactDistance > self.radius:
 			return None
@@ -189,17 +207,17 @@ class AABB(Shape):
 								intersect = planeIntersect
 
 								# Generacion de las uv's
-								if abs(plane.normal[0] > 0):
+								if abs(plane.normal[0]) > 0:
 									# La cara esta en X, se usa Y y Z para crear las uv's
 									u = (planePoint[2] - self.boundsMin[2]) / (self.size[2] + self.bias * 2)
 									v = 1 - (planePoint[1] - self.boundsMin[1]) / (self.size[1] + self.bias * 2)
 								
-								elif abs(plane.normal[1] > 0):
+								elif abs(plane.normal[1]) > 0:
 									# La cara esta en Y, se usa X y Z para crear las uv's
 									u = (planePoint[0] - self.boundsMin[0]) / (self.size[0] + self.bias * 2) 
 									v = (planePoint[2] - self.boundsMin[2]) / (self.size[2] + self.bias * 2) 
 
-								elif abs(plane.normal[2] > 0):
+								elif abs(plane.normal[2]) > 0:
 									# La cara esta en Z, se usa X y Y para crear las uv's
 									u = (planePoint[0] - self.boundsMin[0]) / (self.size[0] + self.bias * 2)
 									v = 1 - (planePoint[1] - self.boundsMin[1]) / (self.size[1] + self.bias * 2)
