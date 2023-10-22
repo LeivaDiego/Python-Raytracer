@@ -6,8 +6,8 @@ from lights import *
 from materials import *
 
 def main():
-	width = 192
-	height = 108
+	width = 768
+	height = 432
 
 	pygame.init()
 
@@ -57,7 +57,6 @@ def main():
 
 	# ---------------------------------------- Figuras en la escena ----------------------------------------
 
-
 	raytracer.scene.append(AABB(position = (0,  -5, -6), size = (8,8,8), material = floor))
 	raytracer.scene.append(AABB(position = (0,  1, -14), size = (8,8,8), material = crystal))
 
@@ -70,10 +69,9 @@ def main():
 	raytracer.scene.append(Sphere(position = [5,1,-5], radius = 1, material = metallicPlanet))
 
 	raytracer.scene.append(Model(file = 'models/trident.obj', 
-								translate = (0,0.3,-5),
+								translate = (0,0.3,-4),
 								rotate = (-75,45,10),
 								material = gold))
-
 
 	raytracer.scene.append(AABB(position = (0, -1, -4), size = (1,1,1), material = podium))
 
