@@ -1,4 +1,4 @@
-from myNumpy import add_vector, vector_magnitude, dot_product, subtract_vector, vector_normalize, vector_scalar_mult, cross_product
+from myNumpy import add_vector, barycentricCoords, vector_magnitude, dot_product, subtract_vector, vector_normalize, vector_scalar_mult, cross_product
 from math import pi, atan2, acos
 from obj import Obj
 import numpy as np
@@ -244,7 +244,7 @@ class Triangle(Shape):
 	#		- https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection.html
 
 
-	def __init__(self, v0, v1, v2, material):
+	def __init__(self, v0, v1, v2, material, uv0=None, uv1=None, uv2=None):
 		# Vertices del triangulo
 		self.v0 = v0
 		self.v1 = v1
@@ -256,6 +256,11 @@ class Triangle(Shape):
 
 		# La normal del triangulo a partir del producto cruz normalizado de las aristas
 		self.normal = vector_normalize(cross_product(self.v0v1, self.v0v2))
+
+		# Coordenadas UV de un triangulo de un Objeto
+		self.uv0 = uv0
+		self.uv1 = uv1
+		self.uv2 = uv2
 
 		super().__init__(v0, material)
 
@@ -301,12 +306,23 @@ class Triangle(Shape):
 		# Punto de interseccion P
 		P = add_vector(origin, vector_scalar_mult(t, direction))
 
-		return Intercept(distance=t,
-							point=P,
-							normal=self.normal,
-							obj=self,
-							texcoords=(u,v))
 
+		# Si se tiene informacion de UV de textura, se interpola usando coordenadas baricentricas
+		if self.uv0 and self.uv1 and self.uv2:
+
+			bary_coords = barycentricCoords(self.v0, self.v1, self.v2, P)
+
+			uv = (self.uv0[0] * bary_coords[0] + self.uv1[0] * bary_coords[1] + self.uv2[0] * bary_coords[2],
+					1 - (self.uv0[1] * bary_coords[0] + self.uv1[1] * bary_coords[1] + self.uv2[1] * bary_coords[2]))
+
+		else:
+			uv = (u, v) # Las coordenadas u y v calculadas directamente en la interseccion
+		
+		return Intercept(distance=t,
+						 point=P,
+						 normal=self.normal,
+						 obj=self,
+						 texcoords=uv)
 
 
 class Model:
@@ -347,11 +363,9 @@ class Model:
 			v0 = (transformation_matrix @ np.append(v0, 1))[:3]
 			v1 = (transformation_matrix @ np.append(v1, 1))[:3]
 			v2 = (transformation_matrix @ np.append(v2, 1))[:3]
-			normal = np.cross(v1 - v0, v2 - v0)
-			normal = vector_normalize(normal)
 		
 			# Creacion de una instancia de Triangle
-			self.triangles.append(Triangle(v0, v1, v2, self.material))
+			self.triangles.append(Triangle(v0, v1, v2, self.material, uv0=vt1, uv1=vt2, uv2=vt3))
 			
 
 
