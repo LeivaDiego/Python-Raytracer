@@ -31,7 +31,7 @@ faceTexture   = pygame.image.load("textures/model.bmp")
 
 # --------------------------------------- Creacion de materiales ---------------------------------------
 face = Material(texture=faceTexture)
-
+grass = Material(diffuse=(0.4, 1, 0.4), spec = 32, Ks = 0.1)
 
 # Opacos
 scaly = Material(spec = 64, Ks = 0.2, texture = scalyTexture)
@@ -45,13 +45,14 @@ iridescent = Material(diffuse=(0.9, 0.9, 0.9), spec = 128, Ks = 0.2, ior= 1.5, m
 
 # ---------------------------------------- Figuras en la escena ----------------------------------------
 cabeza = Model(file = 'models/model.obj', 
-			   translate=(0,0,-2.5), 
+			   translate=(0,0,-5), 
 			   rotate=(0,90,0), 
 			   scale=(1,1,1), 
 			   material= face)
 
 for triangle in cabeza.triangles:
 	raytracer.scene.append(triangle)
+
 
 # ----------------------------------------- Luces de la escena -----------------------------------------
 raytracer.lights.append(AmbientLight(intensity = 0.1))

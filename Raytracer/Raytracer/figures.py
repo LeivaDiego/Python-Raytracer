@@ -1,7 +1,6 @@
-from myNumpy import add_vector, barycentricCoords, vector_magnitude, dot_product, subtract_vector, vector_normalize, vector_scalar_mult, cross_product
-from math import pi, atan2, acos
+from myNumpy import add_vector, barycentricCoords, matrix_multiplier, matrix_vector_multiplier, vector_magnitude, dot_product, subtract_vector, vector_normalize, vector_scalar_mult, cross_product
+from math import pi, atan2, acos, sin, cos
 from obj import Obj
-import numpy as np
 
 class Intercept(object):
 	def __init__(self, distance, point, normal, obj, texcoords):
@@ -358,11 +357,15 @@ class Model:
 			Rx = Transform.rotation_x(self.rotate[0])
 			Ry = Transform.rotation_y(self.rotate[1])
 			Rz = Transform.rotation_z(self.rotate[2])
+			R = matrix_multiplier(matrix_multiplier(Rx, Ry), Rz)
+
 			S = Transform.scale(*self.scale)
-			transformation_matrix = T @ (Rz @ (Ry @ (Rx @ S)))
-			v0 = (transformation_matrix @ np.append(v0, 1))[:3]
-			v1 = (transformation_matrix @ np.append(v1, 1))[:3]
-			v2 = (transformation_matrix @ np.append(v2, 1))[:3]
+
+			transformation_matrix = matrix_multiplier((matrix_multiplier(T, R)), S)
+
+			v0 = matrix_vector_multiplier(transformation_matrix, v0 + [1]) [:3]
+			v1 = matrix_vector_multiplier(transformation_matrix, v1 + [1]) [:3]
+			v2 = matrix_vector_multiplier(transformation_matrix, v2 + [1]) [:3]
 		
 			# Creacion de una instancia de Triangle
 			self.triangles.append(Triangle(v0, v1, v2, self.material, uv0=vt1, uv1=vt2, uv2=vt3))
@@ -375,55 +378,54 @@ class Transform:
 	@staticmethod
 	def translation(tx, ty, tz):
 		# Matrix de traslacion
-		return np.array([
-			[1, 0, 0, tx],
-			[0, 1, 0, ty],
-			[0, 0, 1, tz],
-			[0, 0, 0, 1]
-		])
+		return [[1, 0, 0, tx],
+				[0, 1, 0, ty],
+				[0, 0, 1, tz],
+				[0, 0, 0, 1]]
 
 	@staticmethod
 	def scale(sx, sy, sz):
 		# Matriz de escala
-		return np.array([
-			[sx, 0, 0, 0],
-			[0, sy, 0, 0],
-			[0, 0, sz, 0],
-			[0, 0, 0, 1]
-		])
+		return [[sx, 0, 0, 0],
+				[0, sy, 0, 0],
+				[0, 0, sz, 0],
+				[0, 0, 0, 1]]
 
 	@staticmethod
-	def rotation_x(angle):
+	def rotation_x(pitch):
+
+		pitch *= pi/180
+
 		# Matriz de rotacion en eje X
-		c = np.cos(np.radians(angle))
-		s = np.sin(np.radians(angle))
-		return np.array([
-			[1, 0, 0, 0],
-			[0, c, -s, 0],
-			[0, s, c, 0],
-			[0, 0, 0, 1]
-		])
+		pitchMat = [[1,0,0,0],
+					[0,cos(pitch),-sin(pitch),0],
+					[0,sin(pitch),cos(pitch),0],
+					[0,0,0,1]]
+
+		return pitchMat
 
 	@staticmethod
-	def rotation_y(angle):
+	def rotation_y(yaw):
+
+		yaw *= pi/180
+
 		# Matriz de rotacion en eje Y
-		c = np.cos(np.radians(angle))
-		s = np.sin(np.radians(angle))
-		return np.array([
-			[c, 0, s, 0],
-			[0, 1, 0, 0],
-			[-s, 0, c, 0],
-			[0, 0, 0, 1]
-		])
+		yawMat = [[cos(yaw),0,sin(yaw),0],
+                    [0,1,0,0],
+                    [-sin(yaw),0,cos(yaw),0],
+                    [0,0,0,1]]
+
+		return yawMat
 
 	@staticmethod
-	def rotation_z(angle):
+	def rotation_z(roll):
+
+		roll *= pi/180
+
 		# Matriz de rotacion en eje Z
-		c = np.cos(np.radians(angle))
-		s = np.sin(np.radians(angle))
-		return np.array([
-			[c, -s, 0, 0],
-			[s, c, 0, 0],
-			[0, 0, 1, 0],
-			[0, 0, 0, 1]
-		])
+		rollMat = [[cos(roll),-sin(roll),0,0],
+                   [sin(roll),cos(roll),0,0],
+                   [0,0,1,0],
+                   [0,0,0,1]]
+
+		return rollMat

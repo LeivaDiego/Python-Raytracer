@@ -90,7 +90,7 @@ def matrix_vector_multiplier(matrix, vector):
 
 
 def identity_matrix(n):
-    # Genera una matriz identidad de tamaño n x n
+    # Genera una matriz identidad de tamano n x n
     # n: Tamano de la matriz
     # Retorna: Matriz identidad n x n
     return [[1 if i == j else 0 for j in range(n)] for i in range(n)]
@@ -268,8 +268,8 @@ def totalInternalReflection(normal, incident, n1, n2):
     # Determina si hay reflexion interna total dadas las condiciones iniciales
     # normal: Vector normal a la superficie
     # incident: Vector de incidencia de la luz
-    # n1: indice de refracción del aire
-    # n2: indice de refracción de la superficie
+    # n1: indice de refraccion del aire
+    # n2: indice de refraccion de la superficie
     # Retorna: True si ocurre reflexion interna total. False en caso contrario
 
     c1 = dot_product(normal, incident)
@@ -293,7 +293,7 @@ def fresnel(normal, incident, n1, n2):
     # n2: indice de refraccion de la superficie
     # Retorna 
     # Kr: Coeficiente de reflexion
-    # Kt: Coeficiente de transmisión
+    # Kt: Coeficiente de transmision
 
     c1 = dot_product(normal, incident)
 
