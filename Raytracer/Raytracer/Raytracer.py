@@ -45,12 +45,14 @@ def main():
 	# ---------------------------------------- Figuras en la escena ----------------------------------------
  
 
-	raytracer.scene.append(Model(file = 'models/trident.obj', 
-								translate=(0,0,-5),
-								rotate=(90,0,0),
-								material= grass))
+	#raytracer.scene.append(Model(file = 'models/trident.obj', 
+	#							translate=(0,0,-5),
+	#							rotate=(90,0,0),
+	#							material= grass))
 
 	#raytracer.scene.append(Sphere(position=[0,0,-4],radius=1, material=grass))
+
+	raytracer.scene.append(Cylinder(position=(0,0,-5), radius=1, height=1, material=grass))
 
 	# ----------------------------------------- Luces de la escena -----------------------------------------
 	raytracer.lights.append(AmbientLight(intensity = 0.1))

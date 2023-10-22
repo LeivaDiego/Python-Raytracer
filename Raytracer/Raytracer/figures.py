@@ -1,5 +1,5 @@
 from myNumpy import add_vector, barycentricCoords, matrix_multiplier, matrix_vector_multiplier, vector_magnitude, dot_product, subtract_vector, vector_normalize, vector_scalar_mult, cross_product
-from math import pi, atan2, acos, sin, cos
+from math import pi, atan2, acos, sin, cos, sqrt
 from obj import Obj
 
 class Intercept(object):
@@ -24,12 +24,13 @@ class Shape(object):
 		return None
 
 
-
 class BoundingBox:
 	def __init__(self, min_corner, max_corner):
+		# Instancia la caja delimitadora, dado un vertice minimo y un maximo
 		self.corners = [min_corner, max_corner]
 
 	def intersection(self, origin, direction, tmax=float('inf')):
+		# Obtiene si un rayo dado golpea la cada delimitadora de un objeto
 		tmin = 0.0
 		epsilon = 1e-6
 
@@ -49,7 +50,6 @@ class BoundingBox:
 			tmin = max(t1, tmin)
 			tmax = min(t2, tmax)
 		return tmin < tmax
-
 
 
 class Sphere(Shape):
@@ -258,7 +258,6 @@ class AABB(Shape):
 						 texcoords = (u, v))
 
 
-
 class Triangle(Shape):
 	# Clase que representa un triangulo en un espacio 3D
 
@@ -289,6 +288,8 @@ class Triangle(Shape):
 
 
 	def get_bounding_box(self):
+		# Define la caja delimitadora obteniendo minimos y maximos de los vertices del triangulo
+
 		min_corner = [
 			min(self.v0[0], self.v1[0], self.v2[0]),
 			min(self.v0[1], self.v1[1], self.v2[1]),
@@ -303,8 +304,12 @@ class Triangle(Shape):
 
 
 	def ray_intersect(self, origin, direction):
+		# Verifica si un rayo golpea al triangulo
+
+		# Si no esta en el bounding box, se descarta
 		if not self.bounding_box.intersection(origin, direction):
 			return None
+
 		# Algoritmo Möller - Trumbore
 		pvec = cross_product(direction, self.v0v2)
 		det = dot_product(self.v0v1, pvec)
@@ -315,7 +320,6 @@ class Triangle(Shape):
 			return None
 		
 		# Obtencion de UV's
-		
 		invDet = 1.0 / det # el inverso del determinante
 
 		tvec = subtract_vector(origin, self.v0) # vector t dado desde el origen de rayo hasta el v0
@@ -367,6 +371,9 @@ class Model(Shape):
 		self.bounding_box = self.get_bounding_box()
 	
 	def get_bounding_box(self):
+		# Obtiene la caja delimitadora dadas las cajas 
+		# minimas y maximas de los triangulos que lo componen
+		
 		if not self.triangles:
 			return None
 
@@ -392,7 +399,7 @@ class Model(Shape):
 			v1 = obj.vertices[face[1][0] - 1]
 			v2 = obj.vertices[face[2][0] - 1]
 			
-			# Aplicar las transformaciones correspondientes
+			# Obtener matrices de transformacion respectivas 
 			T = Transform.translation(*self.translate)
 			Rx = Transform.rotation_x(self.rotate[0])
 			Ry = Transform.rotation_y(self.rotate[1])
@@ -402,7 +409,8 @@ class Model(Shape):
 			S = Transform.scale(*self.scale)
 
 			transformation_matrix = matrix_multiplier((matrix_multiplier(T, R)), S)
-
+			
+			# Aplicar las transformaciones correspondientes
 			v0 = matrix_vector_multiplier(transformation_matrix, v0 + [1]) [:3]
 			v1 = matrix_vector_multiplier(transformation_matrix, v1 + [1]) [:3]
 			v2 = matrix_vector_multiplier(transformation_matrix, v2 + [1]) [:3]
@@ -411,6 +419,8 @@ class Model(Shape):
 			self.triangles.append(Triangle(v0, v1, v2, self.material))
 
 	def ray_intersect(self, origin, direction):
+		# Verifica que el rayo golpee la caja delimitadora del modelo, 
+		# de lo contrario se omite, y no se prueba con sus poligonos
 		if not self.bounding_box.intersection(origin, direction):
 			return None
 
@@ -420,9 +430,8 @@ class Model(Shape):
 				return intersect  # Retorna la primera interseccion encontrada
 
 		return None  # Retorna None si no hay intersecciones
-			
-
-
+		
+	
 class Transform:
 	# Clase que representa las matrices de transformaciones basicas de un objeto
 
@@ -480,3 +489,36 @@ class Transform:
 				   [0,0,0,1]]
 
 		return rollMat
+
+
+class Cylinder(Shape):
+	def __init__(self, position, radius, height, material):
+		self.radius = radius
+		self.height = height
+		super().__init__(position, material)
+
+
+	def ray_intersect(self, origin, direction):
+		# Variables auxiliares
+		dx, dy, dz = direction
+		ox, oy, oz = origin
+		cx, cy, cz = self.position[0], self.position[1] - self.height / 2, self.position[2]
+
+		# Intersección con el cuerpo lateral del cilindro
+		a = dx**2 + dz**2
+		b = 2 * ((ox - cx) * dx + (oz - cz) * dz)
+		c = (ox - cx)**2 + (oz - cz)**2 - self.radius**2
+
+		discriminant = b**2 - 4*a*c
+		if discriminant >= 0:
+			sqrt_discriminant = sqrt(discriminant)
+			for t in [(-b - sqrt_discriminant) / (2*a), (-b + sqrt_discriminant) / (2*a)]:
+				y_intersect = oy + t * dy
+				if cy <= y_intersect <= cy + self.height:
+					P = [ox + t * dx, oy + t * dy, oz + t * dz]
+					normal = [(P[0] - cx) / self.radius, 0, (P[2] - cz) / self.radius]
+					u = (atan2(normal[2], normal[0]) / (2 * pi) + 0.5)
+					v = (y_intersect - cy) / self.height
+					return Intercept(t, P, normal, self, (u, v))
+
+		return None
