@@ -27,6 +27,7 @@ iridTexture   = pygame.image.load("textures/iridescent_tex.jpg")
 scalyTexture  = pygame.image.load("textures/scale_tex.jpg")
 spralTexture  = pygame.image.load("textures/spratlite_tex.png")
 metalTexture  = pygame.image.load("textures/metalex.jpg")
+faceTexture   = pygame.image.load("textures/model.bmp")
 
 # --------------------------------------- Creacion de materiales ---------------------------------------
 grass = Material(diffuse=(0.4, 1, 0.4), spec = 32, Ks = 0.1)
@@ -45,7 +46,7 @@ iridescent = Material(diffuse=(0.9, 0.9, 0.9), spec = 128, Ks = 0.2, ior= 1.5, m
 # ---------------------------------------- Figuras en la escena ----------------------------------------
 cabeza = Model(file = 'models/model.obj', 
 			   translate=(0,0,-3), 
-			   rotate=(0,0,0), 
+			   rotate=(0,90,0), 
 			   scale=(1,1,1), 
 			   material= grass)
 
@@ -53,7 +54,7 @@ for triangle in cabeza.triangles:
 	raytracer.scene.append(triangle)
 
 # ----------------------------------------- Luces de la escena -----------------------------------------
-raytracer.lights.append(AmbientLight(intensity=0.1))
+raytracer.lights.append(AmbientLight(intensity = 0.1))
 raytracer.lights.append(DirectionalLight(direction = (-1,-1,-1), intensity = 0.9))
 #raytracer.lights.append(PointLight(point = (2.5,0,-4.5), intensity = 100, color = (1,0.2,1)))
 

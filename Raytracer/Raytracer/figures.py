@@ -328,39 +328,31 @@ class Model:
 		
 		# Descomposicion del modelo en triangulos
 		for face in obj.faces:
-			v1 = obj.vertices[face[0][0] - 1]
-			v2 = obj.vertices[face[1][0] - 1]
-			v3 = obj.vertices[face[2][0] - 1]
-			
+			v0 = obj.vertices[face[0][0] - 1]
+			v1 = obj.vertices[face[1][0] - 1]
+			v2 = obj.vertices[face[2][0] - 1]
+
 			# Obtencion de coordenadas UV para cada vertice
 			vt1 = obj.texcoords[face[0][1] - 1] if face[0][1] else None
 			vt2 = obj.texcoords[face[1][1] - 1] if face[1][1] else None
 			vt3 = obj.texcoords[face[2][1] - 1] if face[2][1] else None
 			
-			# Creacion de una instancia de Triangle
-			triangle = Triangle(v1, v2, v3, self.material)
-			
 			# Aplicar las transformaciones correspondientes
-			self.apply_transformations(triangle)
-			
-			# Agregar el triangulo al listado de triangulos del modelo
-			self.triangles.append(triangle)
-			
-
-	def apply_transformations(self, triangle):
-		T = Transform.translation(*self.translate)
-		Rx = Transform.rotation_x(self.rotate[0])
-		Ry = Transform.rotation_y(self.rotate[1])
-		Rz = Transform.rotation_z(self.rotate[2])
-		S = Transform.scale(*self.scale)
+			T = Transform.translation(*self.translate)
+			Rx = Transform.rotation_x(self.rotate[0])
+			Ry = Transform.rotation_y(self.rotate[1])
+			Rz = Transform.rotation_z(self.rotate[2])
+			S = Transform.scale(*self.scale)
+			transformation_matrix = T @ (Rz @ (Ry @ (Rx @ S)))
+			v0 = (transformation_matrix @ np.append(v0, 1))[:3]
+			v1 = (transformation_matrix @ np.append(v1, 1))[:3]
+			v2 = (transformation_matrix @ np.append(v2, 1))[:3]
+			normal = np.cross(v1 - v0, v2 - v0)
+			normal = vector_normalize(normal)
 		
-		# Combinacion de matrices de transformacion
-		transformation_matrix = T @ (Rz @ (Ry @ (Rx @ S)))
-		
-		# Aplica la combinacion de las transformaciones para cada vertice del triangulo
-		triangle.v0 = (transformation_matrix @ np.append(triangle.v0, 1))[:3]
-		triangle.v1 = (transformation_matrix @ np.append(triangle.v1, 1))[:3]
-		triangle.v2 = (transformation_matrix @ np.append(triangle.v2, 1))[:3]
+			# Creacion de una instancia de Triangle
+			self.triangles.append(Triangle(v0, v1, v2, self.material))
+			
 
 
 class Transform:

@@ -3,7 +3,6 @@ OPAQUE = 0
 REFLECTIVE = 1
 TRANSPARENT = 2
 
-
 class Material(object):
     # Clase que representa el material de un objeto
     # dicta el comportamiento de la luz con la superficie del objeto
