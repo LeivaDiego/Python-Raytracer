@@ -20,3 +20,10 @@ adjunto una preview del render final
 
 ### Preview
 ![output](https://github.com/LeivaDiego/Python-Raytracer/assets/110699607/33770019-5415-4e38-a696-1c0b27011169)
+
+## Entrega Proyecto 2: Ray Tracer
+La entrega se encuentra en la branch "main"
+adjunto una preview del render final
+
+### Preview
+![output zoom in](https://github.com/LeivaDiego/Python-Raytracer/assets/110699607/3ef7defd-aa52-471d-aac1-2ff3ae321c75)
