@@ -24,6 +24,34 @@ class Shape(object):
 		return None
 
 
+
+class BoundingBox:
+	def __init__(self, min_corner, max_corner):
+		self.corners = [min_corner, max_corner]
+
+	def intersection(self, origin, direction, tmax=float('inf')):
+		tmin = 0.0
+		epsilon = 1e-6
+
+		dir_inv = [1.0 / d if d != 0 else float('inf') for d in direction]
+		tmin = 0.0
+		for d in range(3):
+			sign = 1 if dir_inv[d] < 0 else 0
+			bmin = self.corners[sign][d]
+			bmax = self.corners[not sign][d]
+			dmin = (bmin - origin[d]) * dir_inv[d]
+			dmax = (bmax - origin[d]) * dir_inv[d]
+
+			# Aplicar el ajuste epsilon
+			t1 = min(dmin, dmax) - epsilon
+			t2 = max(dmin, dmax) + epsilon
+
+			tmin = max(t1, tmin)
+			tmax = min(t2, tmax)
+		return tmin < tmax
+
+
+
 class Sphere(Shape):
 	# Representacion de una esfera
 
@@ -31,10 +59,8 @@ class Sphere(Shape):
 		self.radius = radius
 		super().__init__(position, material)
 
-
 	def ray_intersect(self, origin, direction):
 		# Propia funcion de interseccion de rayos para la esfera
-
 		L = subtract_vector(self.position, origin)
 		lengthL = vector_magnitude(L)
 		tca = dot_product(L, direction)
@@ -243,7 +269,7 @@ class Triangle(Shape):
 	#		- https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection.html
 
 
-	def __init__(self, v0, v1, v2, material, uv0=None, uv1=None, uv2=None):
+	def __init__(self, v0, v1, v2, material):
 		# Vertices del triangulo
 		self.v0 = v0
 		self.v1 = v1
@@ -256,15 +282,29 @@ class Triangle(Shape):
 		# La normal del triangulo a partir del producto cruz normalizado de las aristas
 		self.normal = vector_normalize(cross_product(self.v0v1, self.v0v2))
 
-		# Coordenadas UV de un triangulo de un Objeto
-		self.uv0 = uv0
-		self.uv1 = uv1
-		self.uv2 = uv2
+		# Obtener la bounding box del triangulo
+		self.bounding_box = self.get_bounding_box()
 
 		super().__init__(v0, material)
 
 
+	def get_bounding_box(self):
+		min_corner = [
+			min(self.v0[0], self.v1[0], self.v2[0]),
+			min(self.v0[1], self.v1[1], self.v2[1]),
+			min(self.v0[2], self.v1[2], self.v2[2])
+		]
+		max_corner = [
+			max(self.v0[0], self.v1[0], self.v2[0]),
+			max(self.v0[1], self.v1[1], self.v2[1]),
+			max(self.v0[2], self.v1[2], self.v2[2])
+		]
+		return BoundingBox(min_corner, max_corner)
+
+
 	def ray_intersect(self, origin, direction):
+		if not self.bounding_box.intersection(origin, direction):
+			return None
 		# Algoritmo Möller - Trumbore
 		pvec = cross_product(direction, self.v0v2)
 		det = dot_product(self.v0v1, pvec)
@@ -305,26 +345,15 @@ class Triangle(Shape):
 		# Punto de interseccion P
 		P = add_vector(origin, vector_scalar_mult(t, direction))
 
-
-		# Si se tiene informacion de UV de textura, se interpola usando coordenadas baricentricas
-		if self.uv0 and self.uv1 and self.uv2:
-
-			bary_coords = barycentricCoords(self.v0, self.v1, self.v2, P)
-
-			uv = (self.uv0[0] * bary_coords[0] + self.uv1[0] * bary_coords[1] + self.uv2[0] * bary_coords[2],
-					1 - (self.uv0[1] * bary_coords[0] + self.uv1[1] * bary_coords[1] + self.uv2[1] * bary_coords[2]))
-
-		else:
-			uv = (u, v) # Las coordenadas u y v calculadas directamente en la interseccion
 		
 		return Intercept(distance=t,
 						 point=P,
 						 normal=self.normal,
 						 obj=self,
-						 texcoords=uv)
+						 texcoords=(u,v))
 
 
-class Model:
+class Model(Shape):
 	# Clase que representa un modelo 3D
 
 	def __init__(self, file, material, translate=(0, 0, 0), rotate=(0, 0, 0), scale=(1, 1, 1)):
@@ -335,7 +364,23 @@ class Model:
 		self.scale = scale
 		self.triangles = []
 		self.load_model()
-		
+		self.bounding_box = self.get_bounding_box()
+	
+	def get_bounding_box(self):
+		if not self.triangles:
+			return None
+
+		min_corner = list(self.triangles[0].bounding_box.corners[0])
+		max_corner = list(self.triangles[0].bounding_box.corners[1])
+
+		for triangle in self.triangles[1:]:
+			for d in range(3):
+				min_corner[d] = min(min_corner[d], triangle.bounding_box.corners[0][d])
+				max_corner[d] = max(max_corner[d], triangle.bounding_box.corners[1][d])
+
+		return BoundingBox(min_corner, max_corner)
+
+
 	def load_model(self):
 		# Carga la informacion del modelo del archivo .obj para su procesamiento
 
@@ -346,11 +391,6 @@ class Model:
 			v0 = obj.vertices[face[0][0] - 1]
 			v1 = obj.vertices[face[1][0] - 1]
 			v2 = obj.vertices[face[2][0] - 1]
-
-			# Obtencion de coordenadas UV para cada vertice
-			vt1 = obj.texcoords[face[0][1] - 1] if face[0][1] else None
-			vt2 = obj.texcoords[face[1][1] - 1] if face[1][1] else None
-			vt3 = obj.texcoords[face[2][1] - 1] if face[2][1] else None
 			
 			# Aplicar las transformaciones correspondientes
 			T = Transform.translation(*self.translate)
@@ -368,7 +408,18 @@ class Model:
 			v2 = matrix_vector_multiplier(transformation_matrix, v2 + [1]) [:3]
 		
 			# Creacion de una instancia de Triangle
-			self.triangles.append(Triangle(v0, v1, v2, self.material, uv0=vt1, uv1=vt2, uv2=vt3))
+			self.triangles.append(Triangle(v0, v1, v2, self.material))
+
+	def ray_intersect(self, origin, direction):
+		if not self.bounding_box.intersection(origin, direction):
+			return None
+
+		for triangle in self.triangles:
+			intersect = triangle.ray_intersect(origin, direction)
+			if intersect is not None:
+				return intersect  # Retorna la primera interseccion encontrada
+
+		return None  # Retorna None si no hay intersecciones
 			
 
 
@@ -411,9 +462,9 @@ class Transform:
 
 		# Matriz de rotacion en eje Y
 		yawMat = [[cos(yaw),0,sin(yaw),0],
-                    [0,1,0,0],
-                    [-sin(yaw),0,cos(yaw),0],
-                    [0,0,0,1]]
+					[0,1,0,0],
+					[-sin(yaw),0,cos(yaw),0],
+					[0,0,0,1]]
 
 		return yawMat
 
@@ -424,8 +475,8 @@ class Transform:
 
 		# Matriz de rotacion en eje Z
 		rollMat = [[cos(roll),-sin(roll),0,0],
-                   [sin(roll),cos(roll),0,0],
-                   [0,0,1,0],
-                   [0,0,0,1]]
+				   [sin(roll),cos(roll),0,0],
+				   [0,0,1,0],
+				   [0,0,0,1]]
 
 		return rollMat
