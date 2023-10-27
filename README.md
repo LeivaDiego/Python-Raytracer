@@ -34,6 +34,8 @@ adjunto una preview del render final
 **Aviso**
 La primera versión de la imagen resultó así debido a mi entusiasmo por incorporar múltiples elementos y detalles. Quería abarcar todos los puntos posibles del proyecto. Sin embargo, me di cuenta de que había caído en el exceso, lo que llevó a una saturación visual y perdí coherencia con la imagen de referencia. No logré capturar la estética y el equilibrio que buscaba, y terminé desviándome de mi visión original.
 Reconociendo mis errores, decidí hacer una segunda versión. En esta nueva iteración, me centré en ser fiel a la imagen de referencia, eliminando elementos innecesarios y prestando más atención a detalles como la iluminación, objetos en escena, materiales, texturas, y posicionamiento de los objetos. Mi objetivo fue refinar y simplificar, priorizando la calidad sobre la cantidad.
-#### Low res Preview
-![output zoom in V2](https://github.com/LeivaDiego/Python-Raytracer/assets/110699607/ceb9bc5f-249e-4bcf-8f49-72437ef52a7f)
+#### High res Output
+![output](https://github.com/LeivaDiego/Python-Raytracer/assets/110699607/8a1eae71-ab08-4d4f-90d2-66047bb33f9e)
 ![Ref Image](https://github.com/LeivaDiego/Python-Raytracer/assets/110699607/c830d5aa-cd89-45f8-b1a8-66dea6ea4454)
+**8.5 HORAS de renderizado**
+![High res V2 render Time](https://github.com/LeivaDiego/Python-Raytracer/assets/110699607/897a6f45-9d05-47e7-b817-5538a20b66ad)
